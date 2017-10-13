@@ -1,0 +1,80 @@
+* {
+    margin: 0;
+}
+
+html {
+    position: relative;
+    height: 100%
+}
+
+body {
+    /* Margin bottom by footer height */
+    height: 100%;
+    margin-bottom: 60px;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    padding: 2em;
+    background-color: #282828;
+    margin-top: 50px;
+}
+
+.footer img {
+    margin-right: 2em;
+}
+
+.status {
+    margin: 0px auto;
+    text-align: center;
+    width: 45%;
+}
+
+.setup table {
+    display: inline-block;
+    padding: 20px;
+}
+
+#browsebutton {
+    background-color: white;
+}
+
+#my-file-selector {
+    display: none;
+}
+
+.row{
+    margin-top:40px;
+    padding: 0 10px;
+}
+
+.panel-heading span {
+	margin-top: -20px;
+	font-size: 15px;
+	background-color: #428bca;
+}
+
+.panel > .panel-heading {
+    background-image: none;
+    background-color: #428bca;
+    color: white;
+}
+
+.table > thead > tr > th{
+    border-right: 1px solid #ddd;
+    border-bottom:0;
+}
+
+.table > tbody > tr > td{
+    border-right: 1px solid #ddd;
+}
+
+.table > thead > tr > th:last-of-type {
+    border-right: 0px;
+}
+
+.table > tbody > tr > td:last-of-type {
+    border-right: 0px;
+}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block page_title %} Chips Salsa Portal {% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block page_content %}
+    <div class="container">
+        <br>
+        <img src="{{ url_for('static', filename = 'img/cs_portal_logo.png') }}" class="img-responsive center-block">
+        <br>
+        <div class="text-center">
+            <p>Logged in as: {{ user_dict['email'] }}</p><br>
+        </div>
+
+    </div>
+
+{% endblock %}

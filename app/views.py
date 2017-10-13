@@ -1,0 +1,126 @@
+import json
+from flask import Flask, redirect, render_template, request, session, url_for
+from flask_bootstrap import Bootstrap
+from flask_oauthlib.client import OAuth
+
+from csportalRequests import firecloud_functions, firecloud_requests, launch_requests
+from dictManager import statusDict, userDict
+
+with open('app/config_secrets.json') as data_file:
+    config = json.load(data_file)
+
+GOOGLE_CLIENT_ID = str(config['secret']['GOOGLE_CLIENT_ID'])
+GOOGLE_CLIENT_SECRET = str(config['secret']['GOOGLE_CLIENT_SECRET'])
+REDIRECT_URL = '/oauth2callback'
+
+CSRF_ENABLED = True
+app = Flask(__name__)
+app.debug = True
+app.secret_key = str(config['secret']['APP_SECRET_KEY'])
+
+bootstrap = Bootstrap(app)
+oauth = OAuth(app)
+
+google = oauth.remote_app('google',
+                          consumer_key=GOOGLE_CLIENT_ID,
+                          consumer_secret=GOOGLE_CLIENT_SECRET,
+                          request_token_params={
+                              'scope': 'email',
+                          },
+                          request_token_url=None,
+                          base_url='https://www.googleapis.com/oauth2/v1/',
+                          access_token_method='POST',
+                          access_token_url='https://accounts.google.com/o/oauth2/token',
+                          authorize_url='https://accounts.google.com/o/oauth2/auth'
+                          )
+
+@app.route('/', methods = ['GET', 'POST'])
+def index():
+    status_dict = statusDict.new_dict()
+    user_dict = userDict.new_dict()
+
+    if not firecloud_requests.get_health():
+        return redirect(url_for('firecloud_down'))
+
+    if 'google_token' in session:
+        access_token = session.get('google_token')[0]
+        status_dict = firecloud_functions.populate_status(status_dict, access_token)
+        user_dict = userDict.populate_googleauth(user_dict, google)
+
+    if firecloud_functions.evaluate_upload_status(status_dict):
+        return redirect(url_for('user'))
+    else:
+        return render_template('index.html', status_dict=status_dict, user_dict=user_dict)
+
+@app.route('/user', methods = ['GET', 'POST'])
+def user():
+    status_dict = statusDict.new_dict()
+    user_dict = userDict.new_dict()
+
+    if not firecloud_requests.get_health():
+        return redirect(url_for('firecloud_down'))
+
+    if 'google_token' not in session:
+        return redirect(url_for('index'))
+
+    access_token = session.get('google_token')[0]
+    status_dict = firecloud_functions.populate_status(status_dict, access_token)
+    user_dict = userDict.populate_googleauth(user_dict, google)
+
+    return render_template('user.html', status_dict=status_dict, user_dict=user_dict,
+                           )
+
+@app.route('/firecloud_down')
+def firecloud_down():
+    status_dict = statusDict.new_dict()
+    user_dict = userDict.new_dict()
+
+    if 'google_token' in session:
+        access_token = session.get('google_token')[0]
+        status_dict = firecloud_functions.populate_status(status_dict, access_token)
+        user_dict = userDict.populate_googleauth(user_dict, google)
+
+    return render_template('firecloud_down.html', status_dict=status_dict, user_dict=user_dict)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    status_dict = statusDict.new_dict()
+    user_dict = userDict.new_dict()
+
+    if not firecloud_requests.get_health():
+        return redirect(url_for('firecloud_down'))
+
+    if 'google_token' in session:
+        access_token = session.get('google_token')[0]
+        status_dict = firecloud_functions.populate_status(status_dict, access_token)
+        user_dict = userDict.populate_googleauth(user_dict, google)
+
+    return render_template('404.html', status_dict=status_dict, user_dict=user_dict), 404
+
+@app.route('/login')
+def login():
+    callback=url_for('authorized', _external=True)
+    return google.authorize(callback=callback)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+@app.route(REDIRECT_URL)
+def authorized():
+    resp = google.authorized_response()
+    if resp is None:
+        return 'Access_denied: reasons=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    session['google_token'] = (resp['access_token'], '')
+    return redirect(url_for('index'))
+
+@google.tokengetter
+def get_access_token():
+    return session.get('google_token')
+
+if __name__ == '__main__':
+    app.run(port=8080)

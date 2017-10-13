@@ -1,0 +1,20 @@
+<div class="status">
+    <h3>Instructions</h3>
+    <p>Complete the following to use the CHIPS & SALSA portal:</p>
+    <table class="setup table">
+        <!-- Check Google oauth -->
+        <tr class={{ status_dict['google_status'] }}>
+            <td>1. <a href="{{ url_for('login') }}">Sign in with your Google account</a>.</td>
+        </tr>
+
+        <!-- Check FireCloud -->
+        <tr class={{ status_dict['firecloud_status'] }}>
+            <td>2. <a href="https://portal.firecloud.org/" target="_blank">Register with FireCloud</a>.</td>
+        </tr>
+
+        <!-- Send to Upload page or Modal -->
+        <tr class={{ status_dict['billing_status'] }}>
+            <td>3. <a href="https://software.broadinstitute.org/firecloud/documentation/topic?name=firecloud-tutorials" target="_blank">Setup billing on FireCloud</a>.</td>
+        </tr>
+    </table>
+</div>

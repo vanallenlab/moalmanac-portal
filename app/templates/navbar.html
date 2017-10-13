@@ -1,0 +1,35 @@
+<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+    <div class="container container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('index') }}">CHIPS & SALSA Portal <sup class="text-danger">BETA</sup></a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="http://salsa.broadinstitute.org">SALSA</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Help<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="https://github.com/brendanreardon/chips-salsa_portal/wiki">Documentation</a></li>
+                        <li><a href="https://github.com/brendanreardon/chips-salsa_portal/issues">Issues</a></li>
+                        <li><a href="https://github.com/brendanreardon/chips-salsa_portal">Source Code</a></li>
+                    </ul>
+                </li>
+                {% if user_dict['email'] != '' %}
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{ user_dict['user'] }}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

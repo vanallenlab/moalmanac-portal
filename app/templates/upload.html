@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block page_title %} Chips Salsa Portal {% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}
+
+{% block page_content %}
+    <div class="container">
+        <h2>New Patient Upload</h2>
+
+        <div class="well text-muted">
+            <h4>Data File Storage and Workspaces</h4>
+            <p>
+                By hitting "upload" patient, a FireCloud workspace will be created and your specified files will be uploaded
+                to the corresponding Google bucket.
+            </p>
+        </div>
+
+        <form class="form-inline center-block" action="" method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-xs-6">
+                        <div class="input-group">
+                        {{ form.patientId.label }} <br> {{ form.patientId }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-6">
+                        <div class="input-group">
+                        {{ form.tumorType.label }} <br> {{ form.tumorType }}
+                        </div>
+                    </div>
+                </div>
+            </div> <!--div row -->
+
+            <div class="row">
+                <div class="form-group col-xs-12">
+                     {{ form.description.label }} <br> {{ form.description(rows=5) }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.snvHandle.label }} <br> {{ form.snvHandle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.indelHandle.label }} <br> {{ form.indelHandle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.burdenHandle.label }} <br> {{ form.burdenHandle }}
+                        </div>
+                    </div>
+                </div>
+            </div> <!--div row -->
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.segHandle.label }} <br> {{ form.segHandle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.fusionHandle.label }} <br> {{ form.fusionHandle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                        {{ form.dnarnaHandle.label }} <br> {{ form.dnarnaHandle }}
+                        </div>
+                    </div>
+                </div>
+            </div> <!--div row -->
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            {{ form.germlineHandle.label }} <br> {{ form.germlineHandle }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+{% endblock %}

@@ -3,6 +3,7 @@
 {% block page_title %} Chips Salsa Portal {% endblock %}
 
 {% block scripts %}
+{{super()}}
 {% endblock %}
 
 {% block page_content %}
@@ -12,8 +13,8 @@
         <br>
         <div class="text-center">
             <p>Logged in as: {{ user_dict['email'] }}</p><br>
+            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg" role="button">Upload New Patient</a>
         </div>
 
     </div>
-
 {% endblock %}

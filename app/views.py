@@ -2,9 +2,11 @@ import json
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
 from flask_oauthlib.client import OAuth
+#from gevent import wsgi
 
 from csportalRequests import firecloud_functions, firecloud_requests, launch_requests
 from dictManager import statusDict, userDict
+from forms import UploadForm
 
 with open('app/config_secrets.json') as data_file:
     config = json.load(data_file)
@@ -70,6 +72,40 @@ def user():
     return render_template('user.html', status_dict=status_dict, user_dict=user_dict,
                            )
 
+@app.route('/upload', methods = ['GET', 'POST'])
+def upload():
+    status_dict = statusDict.new_dict()
+    user_dict = userDict.new_dict()
+
+    if not firecloud_requests.get_health():
+        return redirect(url_for('firecloud_down'))
+
+    if 'google_token' not in session:
+        return redirect(url_for('index'))
+
+    access_token = session.get('google_token')[0]
+    status_dict = firecloud_functions.populate_status(status_dict, access_token)
+    user_dict = userDict.populate_googleauth(user_dict, google)
+
+    form = UploadForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        patient = {}
+        patient['patientId'] = request.form['patientId']
+        patient['tumorType'] = request.form['tumorType']
+        patient['description'] = request.form['description']
+        patient['snvHandle'] = request.files['snvHandle']
+        patient['indelHandle'] = request.files['indelHandle']
+        patient['burdenHandle'] = request.files['burdenHandle']
+        patient['segHandle'] = request.files['segHandle']
+        patient['fusionHandle'] = request.files['fusionHandle']
+        patient['dnarnaHandle'] = request.files['dnarnaHandle']
+        patient['germlineHandle'] = request.files['germlineHandle']
+
+        print patient
+
+    return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,
+                           form=form)
+
 @app.route('/firecloud_down')
 def firecloud_down():
     status_dict = statusDict.new_dict()
@@ -122,5 +158,5 @@ def authorized():
 def get_access_token():
     return session.get('google_token')
 
-if __name__ == '__main__':
-    app.run(port=8080)
+if __name__ == "__main__":
+    app.run(threaded=True)

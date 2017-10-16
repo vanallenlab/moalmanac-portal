@@ -9,11 +9,11 @@ class firecloud_requests(object):
 
     @staticmethod
     def get_health():
-        return requests.get("http://api.firecloud.org/health").ok
+        return requests.get("https://api.firecloud.org/health").ok
 
     @staticmethod
     def check_fc_registration(headers):
-        return requests.get("http://api.firecloud.org/me", headers=headers).ok
+        return requests.get("https://api.firecloud.org/me", headers=headers).ok
 
     @staticmethod
     def check_billing_projects(headers):

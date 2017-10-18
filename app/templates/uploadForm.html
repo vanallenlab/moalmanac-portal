@@ -4,6 +4,7 @@
 
     <div class="col-md-12">
         <h4>Required Fields</h4>
+        <p class="text-muted">Add your patient ID, tumor type from Oncotree, and select a billing project. These inputs are required.</p>
     </div>
     <div class="form-row">
         <div class="form-group col-md-4">
@@ -27,11 +28,12 @@
 
     <div class="col-md-12">
         <h4>Optional Fields</h4>
+        <p class="text-muted">Add a description or upload any combination of the file types below. All of these inputs are optional.</p>
     </div>
     <div class="form-row">
         <div class="form-group col-md-12">
             <label for="description">Patient Description:</label>
-            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+            <textarea class="form-control" name="description" id="description" rows="5"></textarea>
         </div>
     </div>
 
@@ -39,16 +41,17 @@
         <div class="form-group col-md-4">
             <label for="snvHandle">Single Nucleotide Variants:</label>
                 <input type="file" class="form-control-file" name="snvHandle" id="snvHandle" aria-describedby="fileHelp">
-                <!-- <small id="fileHelp" class="form-text text-muted">This is some placeholder block-level help
-                text for the above input. It's a bit lighter and easily wraps to a new line.</small> -->
+                <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
         <div class="form-group col-md-4">
             <label for="indelHandle">Insertions or Deletions:</label>
             <input type="file" class="form-control-file" name="indelHandle" id="indelHandle" aria-describedby="fileHelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: Strelka</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="burdenHandle">Somatic Bases Covered:</label>
             <input type="file" class="form-control-file" name="burdenHandle" id="burdenHandle" aria-describedby="filehelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
     </div>
 
@@ -56,14 +59,17 @@
         <div class="form-group col-md-4">
             <label for="segHandle">Copy Number Alterations:</label>
             <input type="file" class="form-control-file" name="segHandle" id="segHandle" aria-describedby="fileHelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: GATK CNV</small>
         </div>
         <div class="form-group col-md-4">
             <label for="fusionHandle">Fusions from RNA:</label>
             <input type="file" class="form-control-file" name="fusionHandle" id="fusionHandle" aria-describedby="fileHelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: Star Fusion</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="dnarnaHandle">Single Nucleotide Variants (RNA):</label>
             <input type="file" class="form-control-file" name="dnarnaHandle" id="dnarnaHandle" aria-describedby="filehelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
     </div>
 
@@ -71,6 +77,7 @@
         <div class="form-group col-md-4">
             <label for="germlineHandle">Germline Variants:</label>
             <input type="file" class="form-control-file" name="germlineHandle" id="germlineHandle" aria-describedby="filehelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: HaplotypeCaller</small>
         </div>
         <div class="col-md-4">
 

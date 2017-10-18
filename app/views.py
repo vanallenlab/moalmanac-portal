@@ -41,6 +41,7 @@ def index():
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
+    # This requests slows down load time noticeably. Is there a way to speed things up?
     if not firecloud_requests.get_health():
         return redirect(url_for('firecloud_down'))
 
@@ -90,9 +91,10 @@ def upload():
     form = UploadForm()
     if request.method == 'POST' and form.validate_on_submit():
         patient = {}
+        patient['billingProject'] = form.billingProject.data
         patient['patientId'] = request.form['patientId']
         patient['tumorType'] = request.form['tumorType']
-        patient['description'] = request.form['description']
+        patient['description'] = form.description.data
         patient['snvHandle'] = request.files['snvHandle']
         patient['indelHandle'] = request.files['indelHandle']
         patient['burdenHandle'] = request.files['burdenHandle']
@@ -101,7 +103,7 @@ def upload():
         patient['dnarnaHandle'] = request.files['dnarnaHandle']
         patient['germlineHandle'] = request.files['germlineHandle']
 
-        print patient
+        return redirect(url_for('user'))
 
     return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,
                            form=form)

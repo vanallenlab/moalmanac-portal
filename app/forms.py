@@ -1,10 +1,12 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import TextField, TextAreaField, validators, StringField, SubmitField
+from wtforms import TextField, TextAreaField, SelectField, validators, StringField, SubmitField
 
 class UploadForm(FlaskForm):
-    patientId = TextField('Patient ID:', validators=[validators.required()], render_kw={'placeholder': 'Dolores'})
-    tumorType = TextField('Tumor Type:', validators=[validators.required()], render_kw={'placeholder': 'Glioblastoma'})
+    billingProject = SelectField(u'FireCloud Billing Project:',
+                                 choices=[('1', 'Option 1'), ('2', 'Option 2')], default=1)
+    patientId = TextField('Patient ID:', validators=[validators.required()])
+    tumorType = TextField('Tumor Type:', validators=[validators.required()])
     snvHandle = FileField('Single Nucleotide Variants:', validators=[validators.optional()])
     indelHandle = FileField('Insertions & Deletions:', validators=[validators.optional()])
     segHandle = FileField('Copy Number Alterations:', validators=[validators.optional()])

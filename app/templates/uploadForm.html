@@ -1,0 +1,90 @@
+<form action="" method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+
+    <div class="col-md-12">
+        <h4>Required Fields</h4>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="patientId">Patient ID:</label>
+            <input type="text" class="form-control" id="patientId" name="patientId" placeholder="Dolores">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="tumorType">Tumor Type:</label>
+            <input type="text" class="form-control" id="tumorType" name="tumorType" placeholder="Glioblastoma">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="billingProject">FireCloud Billing Project:</label>
+            <select class="form-control" id="billingProject">
+                <option>Option 1</option>
+                <option>Option 2</option>
+            </select>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <h4>Optional Fields</h4>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="description">Patient Description:</label>
+            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="snvHandle">Single Nucleotide Variants:</label>
+                <input type="file" class="form-control-file" id="snvHandle" aria-describedby="fileHelp">
+                <!-- <small id="fileHelp" class="form-text text-muted">This is some placeholder block-level help
+                text for the above input. It's a bit lighter and easily wraps to a new line.</small> -->
+        </div>
+        <div class="form-group col-md-4">
+            <label for="indelHandle">Insertions or Deletions:</label>
+            <input type="file" class="form-control-file" id="indelHandle" aria-describedby="fileHelp">
+        </div>
+        <div class="form-group col-md-4"><!-- Put question market for example file -->
+            <label for="burdenHandle">Somatic Bases Covered:</label>
+            <input type="file" class="form-control-file" id="burdenHandle" aria-describedby="filehelp">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="segHandle">Copy Number Alterations:</label>
+            <input type="file" class="form-control-file" id="segHandle" aria-describedby="fileHelp">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="fusionHandle">Fusions from RNA:</label>
+            <input type="file" class="form-control-file" id="fusionHandle" aria-describedby="fileHelp">
+        </div>
+        <div class="form-group col-md-4"><!-- Put question market for example file -->
+            <label for="dnarnaHandle">Single Nucleotide Variants (RNA):</label>
+            <input type="file" class="form-control-file" id="dnarnaHandle" aria-describedby="filehelp">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="germlineHandle">Germline Variants:</label>
+            <input type="file" class="form-control-file" id="germlineHandle" aria-describedby="filehelp">
+        </div>
+        <div class="col-md-4">
+
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+
+    <br>
+    <div class="form-row text-center">
+        <div class="form-group col-md-12">
+            <a href="{{ url_for('user') }}" class="btn btn-default" role="button">Cancel</a>
+            &nbsp;
+            <button type="submit" class="btn btn-primary">Upload New Patient</button>
+        </div>
+    </div>
+</form>

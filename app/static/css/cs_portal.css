@@ -46,8 +46,9 @@ footer {
 }
 
 .row{
-    margin-top:40px;
+    margin-top: 0px;
     padding: 0 10px;
+    width:100%
 }
 
 .panel-heading span {

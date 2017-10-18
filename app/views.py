@@ -51,6 +51,7 @@ def index():
         user_dict = userDict.populate_googleauth(user_dict, google)
 
     if firecloud_functions.evaluate_upload_status(status_dict):
+        # Pass status_dict and user_dict https://stackoverflow.com/questions/17057191/flask-redirect-while-passing-arguments
         return redirect(url_for('user'))
     else:
         return render_template('index.html', status_dict=status_dict, user_dict=user_dict)
@@ -87,8 +88,10 @@ def upload():
     access_token = session.get('google_token')[0]
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
     user_dict = userDict.populate_googleauth(user_dict, google)
+    user_dict = firecloud_functions.populate_user(user_dict, access_token)
 
     form = UploadForm()
+    form.billingProject.choices = user_dict['firecloud_billing']
     if request.method == 'POST' and form.validate_on_submit():
         patient = {}
         patient['billingProject'] = form.billingProject.data
@@ -103,6 +106,7 @@ def upload():
         patient['dnarnaHandle'] = request.files['dnarnaHandle']
         patient['germlineHandle'] = request.files['germlineHandle']
 
+        print patient
         return redirect(url_for('user'))
 
     return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,

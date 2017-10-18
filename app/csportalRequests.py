@@ -72,3 +72,11 @@ class firecloud_functions(object):
         dict['firecloud_status'] = launch_requests.launch_check_fc_registration(access_token)
         dict['billing_status'] = launch_requests.launch_check_billing_projects(access_token)
         return dict
+
+    @staticmethod
+    def populate_user(dict, access_token):
+        billing_list = launch_requests.launch_list_billing_projects(access_token)
+        dict['firecloud_billing'] = []
+        for i in range(0, len(billing_list)):
+            dict['firecloud_billing'].append(tuple([billing_list[i], billing_list[i]]))
+        return dict

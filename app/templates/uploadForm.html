@@ -16,9 +16,10 @@
         </div>
         <div class="form-group col-md-4">
             <label for="billingProject">FireCloud Billing Project:</label>
-            <select class="form-control" id="billingProject">
-                <option>Option 1</option>
-                <option>Option 2</option>
+            <select class="form-control" name="billingProject" id="billingProject">
+                {% for billingAccount in user_dict['firecloud_billing'] %}
+                    <option> {{ billingAccount[1] }} </option>
+                {% endfor %}
             </select>
         </div>
     </div>
@@ -37,39 +38,39 @@
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="snvHandle">Single Nucleotide Variants:</label>
-                <input type="file" class="form-control-file" id="snvHandle" aria-describedby="fileHelp">
+                <input type="file" class="form-control-file" name="snvHandle" id="snvHandle" aria-describedby="fileHelp">
                 <!-- <small id="fileHelp" class="form-text text-muted">This is some placeholder block-level help
                 text for the above input. It's a bit lighter and easily wraps to a new line.</small> -->
         </div>
         <div class="form-group col-md-4">
             <label for="indelHandle">Insertions or Deletions:</label>
-            <input type="file" class="form-control-file" id="indelHandle" aria-describedby="fileHelp">
+            <input type="file" class="form-control-file" name="indelHandle" id="indelHandle" aria-describedby="fileHelp">
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="burdenHandle">Somatic Bases Covered:</label>
-            <input type="file" class="form-control-file" id="burdenHandle" aria-describedby="filehelp">
+            <input type="file" class="form-control-file" name="burdenHandle" id="burdenHandle" aria-describedby="filehelp">
         </div>
     </div>
 
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="segHandle">Copy Number Alterations:</label>
-            <input type="file" class="form-control-file" id="segHandle" aria-describedby="fileHelp">
+            <input type="file" class="form-control-file" name="segHandle" id="segHandle" aria-describedby="fileHelp">
         </div>
         <div class="form-group col-md-4">
             <label for="fusionHandle">Fusions from RNA:</label>
-            <input type="file" class="form-control-file" id="fusionHandle" aria-describedby="fileHelp">
+            <input type="file" class="form-control-file" name="fusionHandle" id="fusionHandle" aria-describedby="fileHelp">
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="dnarnaHandle">Single Nucleotide Variants (RNA):</label>
-            <input type="file" class="form-control-file" id="dnarnaHandle" aria-describedby="filehelp">
+            <input type="file" class="form-control-file" name="dnarnaHandle" id="dnarnaHandle" aria-describedby="filehelp">
         </div>
     </div>
 
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="germlineHandle">Germline Variants:</label>
-            <input type="file" class="form-control-file" id="germlineHandle" aria-describedby="filehelp">
+            <input type="file" class="form-control-file" name="germlineHandle" id="germlineHandle" aria-describedby="filehelp">
         </div>
         <div class="col-md-4">
 

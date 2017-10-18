@@ -13,13 +13,16 @@
         <div class="well text-muted">
             <h4>Data File Storage and Workspaces</h4>
             <p>
-                By hitting "upload" patient, a FireCloud workspace will be created and your specified files will be uploaded
-                to the corresponding Google bucket.
+                By clicking "Upload New Patient", a FireCloud workspace will be created under your specified FireCloud
+                Billing Project and your provided files will be uploaded to the corresponding Google bucket. Permissions
+                to this new workspace are specified by your FireCloud billing project.
+                <br><br>
+                You also agree to the <a href="http://vanallenlab.dana-farber.org/" target="_blank">Van Allen Laboratory</a>
+                contacting you via e-mail requesting feedback based on your experience using CHIPS & SALSA and the CHIPS & SALSA Portal.
             </p>
         </div>
 
         {% include "uploadForm.html" %}
 
     </div>
-
 {% endblock %}

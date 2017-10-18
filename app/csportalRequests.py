@@ -1,5 +1,5 @@
 import requests
-from dictManager import statusDict
+from dictManager import statusDict, workspaceDict
 
 class firecloud_requests(object):
     # https://api.firecloud.org/
@@ -22,6 +22,10 @@ class firecloud_requests(object):
     @staticmethod
     def get_billing_projects(headers):
         return requests.get("https://api.firecloud.org/api/profile/billing", headers=headers).json()
+
+    @staticmethod
+    def create_new_workspace(headers, json):
+        return requests.post("https://api.firecloud.org/api/workspaces", headers=headers, json=json)
 
 class process_requests(firecloud_requests):
     @staticmethod
@@ -58,6 +62,13 @@ class launch_requests(object):
         json = firecloud_requests.get_billing_projects(headers)
         return process_requests.list_billing_projects(json)
 
+    @staticmethod
+    def launch_create_new_workspace(access_token, patient):
+        headers = firecloud_requests.generate_headers(access_token)
+        json = workspaceDict.populate_workspace_json(patient)
+        workspace = firecloud_requests.create_new_workspace(headers, json)
+        print "workspace created?:", workspace.ok
+
 class firecloud_functions(object):
     @staticmethod
     def evaluate_upload_status(status_dict):
@@ -80,3 +91,8 @@ class firecloud_functions(object):
         for i in range(0, len(billing_list)):
             dict['firecloud_billing'].append(tuple([billing_list[i], billing_list[i]]))
         return dict
+
+# Can be deleted
+#    @staticmethod
+#    def create_workspace_json(patient):
+#        return workspaceDict.populate_workspace_json(patient)

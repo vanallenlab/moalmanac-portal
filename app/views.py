@@ -107,6 +107,8 @@ def upload():
         patient['germlineHandle'] = request.files['germlineHandle']
 
         print patient
+        launch_requests.launch_create_new_workspace(access_token, patient)
+
         return redirect(url_for('user'))
 
     return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,

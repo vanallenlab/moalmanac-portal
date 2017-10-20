@@ -79,8 +79,8 @@ def upload():
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
-    if not firecloud_requests.get_health():
-        return redirect(url_for('firecloud_down'))
+    #if not firecloud_requests.get_health():
+    #    return redirect(url_for('firecloud_down'))
 
     if 'google_token' not in session:
         return redirect(url_for('index'))
@@ -106,8 +106,7 @@ def upload():
         patient['dnarnaHandle'] = request.files['dnarnaHandle']
         patient['germlineHandle'] = request.files['germlineHandle']
 
-        print patient
-        launch_requests.launch_create_new_workspace(access_token, patient)
+        launch_requests.launch_csPortal(access_token, patient)
 
         return redirect(url_for('user'))
 

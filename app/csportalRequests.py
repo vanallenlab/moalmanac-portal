@@ -51,7 +51,6 @@ class gcloud_requests(object):
             content_type=file.content_type
         )
 
-    # To Do: Make a progress bar or status update
     @classmethod
     def upload_inputs(cls, patient, workspace_dict):
         gsBucket = cls.initialize_bucket(workspace_dict)

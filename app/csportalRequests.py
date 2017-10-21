@@ -1,5 +1,4 @@
 import requests
-import firecloud.api as fcapi
 
 from google.cloud import storage
 from dictManager import dataModelDict, statusDict, workspaceDict
@@ -31,10 +30,11 @@ class firecloud_requests(object):
         return requests.post("https://api.firecloud.org/api/workspaces", headers=headers, json=json)
 
     @staticmethod
-    def post_entities(workspace_dict, entities_tsv):
-        fcapi.upload_entities(namespace=workspace_dict['namespace'],
-                              workspace=workspace_dict['name'],
-                              entity_data=entities_tsv)
+    def post_entities(headers, workspace_dict, entities_tsv):
+        entities = {"entities": entities_tsv}
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += workspace_dict['namespace'] + "/" + workspace_dict['name'] + "/importEntities"
+        return requests.post(request, headers=headers, data=entities)
 
 class gcloud_requests(object):
     @staticmethod
@@ -109,22 +109,22 @@ class launch_requests(object):
         gcloud_requests.upload_inputs(patient, workspace_dict)
 
     @staticmethod
-    def launch_update_datamodel(patient, workspace_dict):
+    def launch_update_datamodel(access_token, patient, workspace_dict):
         participant_tsv = dataModelDict.create_participant_tsv(patient)
         sample_tsv = dataModelDict.create_sample_tsv(patient)
         pair_tsv = dataModelDict.create_pair_tsv(patient, workspace_dict)
 
-        firecloud_requests.post_entities(workspace_dict, participant_tsv)
-        firecloud_requests.post_entities(workspace_dict, sample_tsv)
-        firecloud_requests.post_entities(workspace_dict, pair_tsv)
+        headers = firecloud_requests.generate_headers(access_token)
+        firecloud_requests.post_entities(headers, workspace_dict, participant_tsv)
+        firecloud_requests.post_entities(headers, workspace_dict, sample_tsv)
+        firecloud_requests.post_entities(headers, workspace_dict, pair_tsv)
 
     @classmethod
     def launch_csPortal(cls, access_token, patient):
         workspace_dict = cls.launch_create_new_workspace(access_token, patient)
         cls.launch_upload_to_googleBucket(patient, workspace_dict)
-        cls.launch_update_datamodel(patient, workspace_dict)
+        cls.launch_update_datamodel(access_token, patient, workspace_dict)
 
-# Should rename this firecloud_requests
 class firecloud_functions(object):
     @staticmethod
     def evaluate_upload_status(status_dict):
@@ -147,4 +147,3 @@ class firecloud_functions(object):
         for i in range(0, len(billing_list)):
             dict['firecloud_billing'].append(tuple([billing_list[i], billing_list[i]]))
         return dict
-

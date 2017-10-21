@@ -70,6 +70,10 @@ class dataModelDict(object):
     def df_to_str(df):
         return df.to_csv(sep='\t', index=False)
 
+    @staticmethod
+    def tsv_to_entities_dict(entities_tsv):
+        return {"entities": entities_tsv}
+
     @classmethod
     def create_participant_tsv(cls, patient):
         patientId = patient['patientId']
@@ -111,4 +115,5 @@ class dataModelDict(object):
         for column_ in _columns[4:]:
             if patient[column_].filename != '':
                 df.loc[0, column_] = google_bucket + patient[column_].filename
-        return cls.df_to_str(df)
+        df_tsv = cls.df_to_str(df)
+        return cls.tsv_to_entities_dict(df_tsv)

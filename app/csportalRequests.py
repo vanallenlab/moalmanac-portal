@@ -1,4 +1,5 @@
 import requests
+import json
 
 from google.cloud import storage
 from dictManager import dataModelDict, statusDict, workspaceDict
@@ -30,10 +31,25 @@ class firecloud_requests(object):
         return requests.post("https://api.firecloud.org/api/workspaces", headers=headers, json=json)
 
     @staticmethod
-    def post_entities(headers, workspace_dict, entities):
+    def post_entities(headers, workspace_dict, entities_tsv):
+        entities = {"entities": entities_tsv}
         request = "https://api.firecloud.org/api/workspaces/"
         request += workspace_dict['namespace'] + "/" + workspace_dict['name'] + "/importEntities"
         return requests.post(request, headers=headers, data=entities)
+
+    @staticmethod
+    def copy_method(headers, workspace_dict):
+        headers["content-type"] = "application/json"
+        payload = {
+            "configurationNamespace": "breardon",
+            "configurationName": "chips",
+            "configurationSnapshotId": 34,
+            "destinationNamespace": "breardon",
+            "destinationName": "chips"}
+
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'method_configs/copyFromMethodRepo'
+        return requests.post(request, headers=headers, data=json.dumps(payload))
 
 class gcloud_requests(object):
     @staticmethod
@@ -108,20 +124,26 @@ class launch_requests(object):
 
     @staticmethod
     def launch_update_datamodel(access_token, patient, workspace_dict):
-        participant_entities = dataModelDict.create_participant_tsv(patient)
-        sample_entities = dataModelDict.create_sample_tsv(patient)
-        pair_entities = dataModelDict.create_pair_tsv(patient, workspace_dict)
+        participant_tsv = dataModelDict.create_participant_tsv(patient)
+        sample_tsv = dataModelDict.create_sample_tsv(patient)
+        pair_tsv = dataModelDict.create_pair_tsv(patient, workspace_dict)
 
         headers = firecloud_requests.generate_headers(access_token)
-        firecloud_requests.post_entities(headers, workspace_dict, participant_entities)
-        firecloud_requests.post_entities(headers, workspace_dict, sample_entities)
-        firecloud_requests.post_entities(headers, workspace_dict, pair_entities)
+        firecloud_requests.post_entities(headers, workspace_dict, participant_tsv)
+        firecloud_requests.post_entities(headers, workspace_dict, sample_tsv)
+        firecloud_requests.post_entities(headers, workspace_dict, pair_tsv)
+
+    @staticmethod
+    def launch_copy_method(access_token, workspace_dict):
+        headers = firecloud_requests.generate_headers(access_token)
+        print firecloud_requests.copy_method(headers, workspace_dict)
 
     @classmethod
     def launch_csPortal(cls, access_token, patient):
         workspace_dict = cls.launch_create_new_workspace(access_token, patient)
         cls.launch_upload_to_googleBucket(patient, workspace_dict)
         cls.launch_update_datamodel(access_token, patient, workspace_dict)
+        cls.launch_copy_method(access_token, workspace_dict)
 
 class firecloud_functions(object):
     @staticmethod

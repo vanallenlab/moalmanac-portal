@@ -51,6 +51,22 @@ class firecloud_requests(object):
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'method_configs/copyFromMethodRepo'
         return requests.post(request, headers=headers, data=json.dumps(payload))
 
+    @staticmethod
+    def post_method_submission(headers, workspace_dict, patient):
+        headers["content-type"] = "application/json"
+        payload = {
+            "methodConfigurationNamespace": "breardon",
+            "methodConfigurationName": "chips",
+            "entityType": "pair",
+            "entityName": patient['patientId'] + '-pair',
+            "useCallCache": True,
+            "workflowFailureMode": "NoNewCalls"
+        }
+
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'submissions'
+        return requests.post(request, headers=headers, data=json.dumps(payload))
+
 class gcloud_requests(object):
     @staticmethod
     def initialize_bucket(workspace_dict):
@@ -136,7 +152,12 @@ class launch_requests(object):
     @staticmethod
     def launch_copy_method(access_token, workspace_dict):
         headers = firecloud_requests.generate_headers(access_token)
-        print firecloud_requests.copy_method(headers, workspace_dict)
+        firecloud_requests.copy_method(headers, workspace_dict)
+
+    @staticmethod
+    def launch_method_submission(access_token, workspace_dict, patient):
+        headers = firecloud_requests.generate_headers(access_token)
+        firecloud_requests.post_method_submission(headers, workspace_dict, patient)
 
     @classmethod
     def launch_csPortal(cls, access_token, patient):
@@ -144,6 +165,7 @@ class launch_requests(object):
         cls.launch_upload_to_googleBucket(patient, workspace_dict)
         cls.launch_update_datamodel(access_token, patient, workspace_dict)
         cls.launch_copy_method(access_token, workspace_dict)
+        cls.launch_method_submission(access_token, workspace_dict, patient)
 
 class firecloud_functions(object):
     @staticmethod

@@ -70,9 +70,10 @@ def user():
     access_token = session.get('google_token')[0]
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
     user_dict = userDict.populate_googleauth(user_dict, google)
+    patient_table = launch_requests.launch_list_workspaces(access_token)
 
     return render_template('user.html', status_dict=status_dict, user_dict=user_dict,
-                           )
+                           patient_table=patient_table)
 
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():

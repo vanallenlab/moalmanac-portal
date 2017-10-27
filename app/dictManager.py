@@ -112,3 +112,57 @@ class dataModelDict(object):
             if patient[column_].filename != '':
                 df.loc[0, column_] = google_bucket + patient[column_].filename
         return cls.df_to_str(df)
+
+class patientTable(object):
+    patientTable_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorType', 'patientId',
+                         'description', 'runningJobs', 'completed']
+
+    @staticmethod
+    def subset_tagged_workspaces(all_workspaces):
+        return [wkspace for wkspace in all_workspaces if "tag:tags" in wkspace['workspace']['attributes']]
+
+    @staticmethod
+    def subset_csPortal_workspaces(tagged_workspaces):
+        return [wkspace for wkspace in tagged_workspaces if u'Chips&SalsaPortal' in wkspace['workspace']['attributes']['tag:tags']['items']]
+
+    @staticmethod
+    def create_workspace_url(namespace, workspace_name):
+        return "https://portal.firecloud.org/#workspaces/" + str(namespace) + "/" + str(workspace_name)
+
+    @staticmethod
+    def convert_time(createdDate):
+        dt = datetime.strptime(createdDate[0:19], '%Y-%m-%dT%H:%M:%S')
+        return dt.strftime('%B %d %Y %I:%M %p')
+
+    @classmethod
+    def format_workspace(cls, workspace):
+        workspace_values = workspace['workspace']
+        namespace_ = workspace_values['namespace']
+        name_ = workspace_values['name']
+        created_date_ = workspace_values['createdDate']
+        attributes_ = workspace_values['attributes']
+        submission_ = workspace['workspaceSubmissionStats']
+
+        df = pd.DataFrame(columns = cls.patientTable_cols)
+        df.loc[0, 'namespace'] = str(namespace_)
+        df.loc[0, 'name'] = str(name_)
+        df.loc[0, 'url'] = cls.create_workspace_url(namespace_, name_)
+        df.loc[0, 'createdDate'] = str(created_date_)
+        df.loc[0, 'time'] = cls.convert_time(df.loc[0, 'createdDate'])
+        df.loc[0, 'tumorType'] = attributes_['tumorType']
+        df.loc[0, 'patientId'] = attributes_['patientId']
+        df.loc[0, 'description'] = attributes_['description']
+        df.loc[0, 'runningJobs'] = submission_['runningSubmissionsCount']
+        df.loc[0, 'completed'] = 'lastSuccessDate' in submission_.keys()
+        return df
+
+    @classmethod
+    def generate_patientTable(cls, all_workspaces):
+        tagged_workspaces = cls.subset_tagged_workspaces(all_workspaces)
+        csPortal_workspaces = cls.subset_csPortal_workspaces(tagged_workspaces)
+
+        patientTable = pd.DataFrame(columns = cls.patientTable_cols)
+        for workspace_ in csPortal_workspaces:
+            patientTable = patientTable.append(cls.format_workspace(workspace_), ignore_index = True)
+
+        return patientTable.sort_values(['createdDate'], ascending = False)

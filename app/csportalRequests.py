@@ -2,7 +2,7 @@ import requests
 import json
 
 from google.cloud import storage
-from dictManager import dataModelDict, statusDict, workspaceDict
+from dictManager import dataModelDict, statusDict, workspaceDict, patientTable
 
 class firecloud_requests(object):
     # https://api.firecloud.org/
@@ -67,6 +67,10 @@ class firecloud_requests(object):
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'submissions'
         return requests.post(request, headers=headers, data=json.dumps(payload))
 
+    @staticmethod
+    def get_workspaces(headers):
+        return requests.get("https://api.firecloud.org/api/workspaces", headers=headers)
+
 class gcloud_requests(object):
     @staticmethod
     def initialize_bucket(workspace_dict):
@@ -125,6 +129,13 @@ class launch_requests(object):
         headers = firecloud_requests.generate_headers(access_token)
         json = firecloud_requests.get_billing_projects(headers)
         return process_requests.list_billing_projects(json)
+
+    @staticmethod
+    def launch_list_workspaces(access_token):
+        headers = firecloud_requests.generate_headers(access_token)
+        workspaces = firecloud_requests.get_workspaces(headers)
+        workspaces_json = workspaces.json()
+        return patientTable.generate_patientTable(workspaces_json)
 
     @staticmethod
     def launch_create_new_workspace(access_token, patient):

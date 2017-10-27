@@ -1,0 +1,19 @@
+<div class="header"><h3>Browse Your Patients</h3></div>
+
+{% for index in patient_table.index.tolist() %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">{{ patient_table.loc[index, 'patientId'] }}
+                <div class="pull-right">Created on: {{ patient_table.loc[index, 'time'] }}</div></h4>
+        </div>
+        <div class="panel-body">
+            <div class="col-sm-3">
+                <button type="button" class="btn btn-success btn-block">View the Report</button>
+                <a href="{{ patient_table.loc[index, 'url'] }}" class="btn btn-default btn-block" role="button" target="_blank">View FireCloud Workspace</a>
+            </div>
+            <div class="col-sm-9">
+                <p style="white-space: pre-wrap;">{{ patient_table.loc[index, 'description'] }}</p>
+            </div>
+        </div>
+    </div>
+{% endfor %}

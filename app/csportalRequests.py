@@ -73,6 +73,12 @@ class firecloud_requests(object):
 
 class gcloud_requests(object):
     @staticmethod
+    def revoke_token(access_token):
+        return requests.post('https://accounts.google.com/o/oauth2/revoke',
+                      params={'token': access_token},
+                      headers={'content-type': 'application/x-www-form-urlencoded'})
+
+    @staticmethod
     def initialize_bucket(workspace_dict):
         gcs = storage.Client()
         bucket = gcs.get_bucket(workspace_dict['bucketHandle'].split('/')[2])

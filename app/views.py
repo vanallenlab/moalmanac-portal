@@ -2,9 +2,9 @@ import json
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
 from flask_oauthlib.client import OAuth
-#from gevent import wsgi
+from gevent import wsgi
 
-from csportalRequests import firecloud_functions, firecloud_requests, launch_requests
+from csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
 from dictManager import statusDict, userDict
 from forms import UploadForm
 
@@ -148,6 +148,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+    if 'google_token' in session:
+        access_token = session.get('google_token')[0]
+        gcloud_requests.revoke_token(access_token)
     session.clear()
     return redirect(url_for('index'))
 
@@ -168,3 +171,5 @@ def get_access_token():
 
 if __name__ == "__main__":
     app.run(threaded=True)
+#    server = wsgi.WSGIServer(('localhost', 5000), app)
+#    server.serve_forever()

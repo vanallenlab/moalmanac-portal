@@ -41,8 +41,8 @@ def index():
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
-    # This requests slows down load time noticeably. Is there a way to speed things up?
-    if not firecloud_requests.get_health():
+    session['firecloudHealth'] = firecloud_requests.get_health()
+    if not session.get('firecloudHealth'):
         return redirect(url_for('firecloud_down'))
 
     if 'google_token' in session:
@@ -61,11 +61,11 @@ def user():
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
-    if not firecloud_requests.get_health():
-        return redirect(url_for('firecloud_down'))
-
     if 'google_token' not in session:
         return redirect(url_for('index'))
+
+    if not session.get('firecloudHealth'):
+        return redirect(url_for('firecloud_down'))
 
     access_token = session.get('google_token')[0]
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
@@ -80,11 +80,11 @@ def upload():
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
-    #if not firecloud_requests.get_health():
-    #    return redirect(url_for('firecloud_down'))
-
     if 'google_token' not in session:
         return redirect(url_for('index'))
+
+    if not session.get('firecloudHealth'):
+        return redirect(url_for('firecloud_down'))
 
     access_token = session.get('google_token')[0]
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
@@ -131,7 +131,7 @@ def page_not_found(e):
     status_dict = statusDict.new_dict()
     user_dict = userDict.new_dict()
 
-    if not firecloud_requests.get_health():
+    if not session.get('firecloudHealth'):
         return redirect(url_for('firecloud_down'))
 
     if 'google_token' in session:

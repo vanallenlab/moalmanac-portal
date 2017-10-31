@@ -10,10 +10,12 @@
         <div class="form-group col-md-4">
             <label for="patientId">Patient ID:</label>
             <input type="text" class="form-control" id="patientId" name="patientId" placeholder="Dolores">
-            <small id="idHelp" class="form-text text-muted">Only letters, numbers, underscores, and dashes allowed</small>
+            <small id="idHelp" class="form-text text-muted">Only letters, numbers, underscores, and are dashes allowed.</small>
         </div>
         <div class="form-group col-md-4">
             <label for="tumorType">Tumor Type:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#oncotreeModal"></span>
+            {% include "modals/oncotreeModal.html" %}
             <input type="text" class="form-control" id="tumorType" name="tumorType" placeholder="Glioblastoma" list="ontology">
             <datalist id="ontology">
             {% for ontology_ in oncotree %}

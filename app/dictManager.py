@@ -190,12 +190,20 @@ class oncoTree(object):
             unicode_list.append(unicode(ontology, errors='ignore'))
         return unicode_list
 
-    @staticmethod
-    def extract_shortcode(ontology):
-        shortcode = str(ontology).split('(')[1].split(')')[0]
-        return unicode(shortcode)
+    @classmethod
+    def extract_shortcode(cls, ontology):
+        oncotree = cls.return_tumorTypes()
+        if ontology in oncotree:
+            shortcode = str(ontology).split('(')[1].split(')')[0]
+            return unicode(shortcode)
+        else:
+            return ontology
 
-    @staticmethod
-    def extract_longcode(ontology):
-        longcode = str(ontology).split(' (')[0]
-        return unicode(longcode)
+    @classmethod
+    def extract_longcode(cls, ontology):
+        oncotree = cls.return_tumorTypes()
+        if ontology in oncotree:
+            longcode = str(ontology).split(' (')[0]
+            return unicode(longcode)
+        else:
+            return ontology

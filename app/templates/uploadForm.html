@@ -42,7 +42,7 @@
     <div class="form-row">
         <div class="form-group col-md-12">
             <label for="description">Patient Description:</label>
-             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#descriptionModal"></span>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#descriptionModal"></span>
             {% include "modals/descriptionModal.html" %}
             <textarea class="form-control" name="description" id="description" rows="5"></textarea>
         </div>
@@ -51,16 +51,22 @@
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="snvHandle">Single Nucleotide Variants:</label>
-                <input type="file" class="form-control-file" name="snvHandle" id="snvHandle" aria-describedby="fileHelp">
-                <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#snvModal"></span>
+            {% include "modals/snvModal.html" %}
+            <input type="file" class="form-control-file" name="snvHandle" id="snvHandle" aria-describedby="fileHelp">
+            <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
         <div class="form-group col-md-4">
             <label for="indelHandle">Insertions or Deletions:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#indelModal"></span>
+            {% include "modals/indelModal.html" %}
             <input type="file" class="form-control-file" name="indelHandle" id="indelHandle" aria-describedby="fileHelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: Strelka</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="burdenHandle">Somatic Bases Covered:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#basesModal"></span>
+            {% include "modals/basesModal.html" %}
             <input type="file" class="form-control-file" name="burdenHandle" id="burdenHandle" aria-describedby="filehelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
@@ -69,16 +75,22 @@
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="segHandle">Copy Number Alterations:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#segModal"></span>
+            {% include "modals/segModal.html" %}
             <input type="file" class="form-control-file" name="segHandle" id="segHandle" aria-describedby="fileHelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: GATK CNV</small>
         </div>
         <div class="form-group col-md-4">
             <label for="fusionHandle">Fusions from RNA:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#fusionModal"></span>
+            {% include "modals/fusionModal.html" %}
             <input type="file" class="form-control-file" name="fusionHandle" id="fusionHandle" aria-describedby="fileHelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: Star Fusion</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
             <label for="dnarnaHandle">Single Nucleotide Variants (RNA):</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#snvRNAModal"></span>
+            {% include "modals/snvRNAModal.html" %}
             <input type="file" class="form-control-file" name="dnarnaHandle" id="dnarnaHandle" aria-describedby="filehelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
@@ -87,6 +99,8 @@
     <div class="form-row">
         <div class="form-group col-md-4">
             <label for="germlineHandle">Germline Variants:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#germlineModal"></span>
+            {% include "modals/germlineModal.html" %}
             <input type="file" class="form-control-file" name="germlineHandle" id="germlineHandle" aria-describedby="filehelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: HaplotypeCaller</small>
         </div>

@@ -1,0 +1,63 @@
+<div class="modal fade" id="segModal" tabindex="-1" role="dialog" aria-labelledby="segModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="segModalLabel">Optional Field: Copy Number Alterations
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button></h5>
+      </div>
+      <div class="modal-body">
+          <p> The current version of CHIPS can process total copy number segment files, which we recommend are generated from
+              GATK CNV and Oncotator. CHIPS specifically requires the following columns:</p>
+
+          <p class="text-muted">gene, segment_contig, segment_start, segment_end, sample, segment_mean</p>
+
+          Example upload file for germline variants using required columns:
+          <div class="table-responsive">
+            <table class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>gene</th>
+                        <th>segment_contig</th>
+                        <th>segment_start</th>
+                        <th>segment_end</th>
+                        <th>sample</th>
+                        <th>segment_mean</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>BRAF</td>
+                        <td>7</td>
+                        <td>140035556</td>
+                        <td>142013739</td>
+                        <td>PatientA-Tumor</td>
+                        <td>1.250062303</td>
+                    </tr>
+                    <tr>
+                        <td>CDKN2A</td>
+                        <td>9</td>
+                        <td>21818453</td>
+                        <td>27173612</td>
+                        <td>PatientA-Tumor</td>
+                        <td>0.822108092</td>
+                    </tr>
+                    <tr>
+                        <td>BOC</td>
+                        <td>3</td>
+                        <td>112282632</td>
+                        <td>113393977</td>
+                        <td>PatientA-Tumor</td>
+                        <td>0.957205107</td>
+                    </tr>
+                </tbody>
+            </table>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="modal fade" id="snvRNAModal" tabindex="-1" role="dialog" aria-labelledby="snvRNAModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="snvRNAModalLabel">Optional Field: Single Nucleotide Variants from RNA
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button></h5>
+      </div>
+      <div class="modal-body">
+          <p>If providing single nucleotide variants from RNA (RNA SNVs) for upload, they should follow the guidelines set by the NCI's
+          <a href="https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+(MAF)+Specification" target="_blank">
+              Mutation Annotation Format (MAF)</a>.
+              We recommend running MuTect on RNA recalibrated BAMs using GATK Best Practices and Oncotator to generate this data.
+              CHIPS specifically requires the following columns:</p>
+
+          <p class="text-muted">Hugo_Symbol, NCBI_Build, Chromosome, Start_position, End_position,
+          Reference_Allele, Tumor_Seq_Allele1, Tumor_Seq_Allele2, Variant_Classification,
+          Protein_Change, Tumor_Sample_Barcode, Matched_Norm_Sample_Barcode,
+          Annotation_Transcript, <br>t_ref_count, t_alt_count</p>
+
+          Example upload file for RNA SNVs using required columns:
+          <div class="table-responsive">
+            <table class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>Hugo_Symbol</th>
+                        <th>NCBI_Build</th>
+                        <th>Chromosome</th>
+                        <th>Start_position</th>
+                        <th>End_position</th>
+                        <th>Reference_Allele</th>
+                        <th>Tumor_Seq_Allele1</th>
+                        <th>Tumor_Seq_Allele2</th>
+                        <th>Variant_Classification</th>
+                        <th>Protein_Change</th>
+                        <th>Tumor_Sample_Barcode</th>
+                        <th>Matched_Norm_Sample_Barcode</th>
+                        <th>Annotation_Transcript</th>
+                        <th>t_ref_count</th>
+                        <th>t_alt_count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>BRAF</td>
+                        <td>37</td>
+                        <td>7</td>
+                        <td>140453136</td>
+                        <td>140453136</td>
+                        <td>A</td>
+                        <td>T</td>
+                        <td>A</td>
+                        <td>Missense_Mutation</td>
+                        <td>p.V600E</td>
+                        <td>PatientA-Tumor-RNA</td>
+                        <td>PatientA-Normal-RNA</td>
+                        <td>ENST00000288602.6</td>
+                        <td>40</td>
+                        <td>25</td>
+                    </tr>
+                    <tr>
+                        <td>MSH2</td>
+                        <td>37</td>
+                        <td>2</td>
+                        <td>47739466</td>
+                        <td>47739466</td>
+                        <td>G</td>
+                        <td>A</td>
+                        <td>G</td>
+                        <td>Missense_Mutation</td>
+                        <td>p.D887N</td>
+                        <td>PatientA-Tumor-RNA</td>
+                        <td>PatientA-Normal-RNA</td>
+                        <td>ENST00000406134.1</td>
+                        <td>40</td>
+                        <td>30</td>
+                    </tr>
+                    <tr>
+                        <td>STAG2</td>
+                        <td>37</td>
+                        <td>X</td>
+                        <td>123191810</td>
+                        <td>123191810</td>
+                        <td>A</td>
+                        <td>T</td>
+                        <td>A</td>
+                        <td>Missense_Mutation</td>
+                        <td>p.F467I</td>
+                        <td>PatientA-Tumor-RNA</td>
+                        <td>PatientA-Normal-RNA</td>
+                        <td>ENST00000371160.1</td>
+                        <td>80</td>
+                        <td>26</td>
+                    </tr>
+                </tbody>
+            </table>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

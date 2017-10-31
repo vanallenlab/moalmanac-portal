@@ -1,0 +1,104 @@
+<div class="modal fade" id="indelModal" tabindex="-1" role="dialog" aria-labelledby="indelModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="snvModalLabel">Optional Field: Insertions & Deletions
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button></h5>
+      </div>
+      <div class="modal-body">
+          <p>If providing insertions and deletions (InDels) for upload, they should follow the guidelines set by the NCI's
+          <a href="https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+(MAF)+Specification" target="_blank">
+              Mutation Annotation Format (MAF)</a>.
+              We recommend Strelka and Oncotator to generate this file. CHIPS specifically requires the following columns:</p>
+
+          <p class="text-muted">Hugo_Symbol, NCBI_Build, Chromosome, Start_position, End_position,
+          Reference_Allele, Tumor_Seq_Allele1, Tumor_Seq_Allele2, Variant_Classification,
+          Protein_Change, Tumor_Sample_Barcode, Matched_Norm_Sample_Barcode,
+          Annotation_Transcript, <br>t_ref_count, t_alt_count</p>
+
+          Example upload file for SNVs using required columns:
+          <div class="table-responsive">
+            <table class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>Hugo_Symbol</th>
+                        <th>NCBI_Build</th>
+                        <th>Chromosome</th>
+                        <th>Start_position</th>
+                        <th>End_position</th>
+                        <th>Reference_Allele</th>
+                        <th>Tumor_Seq_Allele1</th>
+                        <th>Tumor_Seq_Allele2</th>
+                        <th>Variant_Classification</th>
+                        <th>Protein_Change</th>
+                        <th>Tumor_Sample_Barcode</th>
+                        <th>Matched_Norm_Sample_Barcode</th>
+                        <th>Annotation_Transcript</th>
+                        <th>t_ref_count</th>
+                        <th>t_alt_count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PMPCA</td>
+                        <td>37</td>
+                        <td>9</td>
+                        <td>139312448</td>
+                        <td>139312449</td>
+                        <td>-</td>
+                        <td>G</td>
+                        <td>-</td>
+                        <td>Intron</td>
+                        <td></td>
+                        <td>PatientA-Tumor</td>
+                        <td>PatientA-Normal</td>
+                        <td>ENST00000371717.3</td>
+                        <td>92</td>
+                        <td>31</td>
+                    </tr>
+                    <tr>
+                        <td>C10orf2</td>
+                        <td>37</td>
+                        <td>10</td>
+                        <td>102748300</td>
+                        <td>102748301</td>
+                        <td>TC</td>
+                        <td>TC</td>
+                        <td>-</td>
+                        <td>Frame_Shift_Del</td>
+                        <td>p.L112fs</td>
+                        <td>PatientA-Tumor</td>
+                        <td>PatientA-Normal</td>
+                        <td>ENST00000370228.1</td>
+                        <td>294</td>
+                        <td>28</td>
+                    </tr>
+                    <tr>
+                        <td>MEST</td>
+                        <td>37</td>
+                        <td>7</td>
+                        <td>130138285</td>
+                        <td>130138285</td>
+                        <td>C</td>
+                        <td>C</td>
+                        <td>-</td>
+                        <td>Frame_Shift_Del</td>
+                        <td>p.L168fs</td>
+                        <td>PatientA-Tumor</td>
+                        <td>PatientA-Normal</td>
+                        <td>ENST00000223215.4</td>
+                        <td>60</td>
+                        <td>20</td>
+                    </tr>
+                </tbody>
+            </table>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

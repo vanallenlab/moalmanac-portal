@@ -5,7 +5,7 @@ from flask_oauthlib.client import OAuth
 from gevent import wsgi
 
 from csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
-from dictManager import statusDict, userDict
+from dictManager import statusDict, userDict, oncoTree
 from forms import UploadForm
 
 with open('app/config_secrets.json') as data_file:
@@ -90,6 +90,7 @@ def upload():
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
     user_dict = userDict.populate_googleauth(user_dict, google)
     user_dict = firecloud_functions.populate_user(user_dict, access_token)
+    oncotree_list = oncoTree.create_oncoTree_unicode()
 
     form = UploadForm()
     form.billingProject.choices = user_dict['firecloud_billing']
@@ -107,12 +108,15 @@ def upload():
         patient['dnarnaHandle'] = request.files['dnarnaHandle']
         patient['germlineHandle'] = request.files['germlineHandle']
 
+        patient['tumorTypeShort'] = oncoTree.extract_shortcode(patient['tumorType'])
+        patient['tumorTypeLong'] = oncoTree.extract_longcode(patient['tumorType'])
+
         launch_requests.launch_csPortal(access_token, patient)
 
         return redirect(url_for('user'))
 
     return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,
-                           form=form)
+                           form=form, oncotree=oncotree_list)
 
 @app.route('/firecloud_down')
 def firecloud_down():

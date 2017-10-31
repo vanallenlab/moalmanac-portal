@@ -37,7 +37,7 @@ class workspaceDict(object):
 
     @classmethod
     def create_workspace_name(cls, patient):
-        name = cls.to_str(patient['tumorType']) + '_'
+        name = cls.to_str(patient['tumorTypeShort']) + '_'
         name += cls.to_str(patient['patientId']) + '_'
         name += cls.to_str(datetime.now().strftime('%Y-%m-%d')) + '_'
         name += cls.to_str(datetime.now().strftime('%H-%M-%S'))
@@ -52,7 +52,8 @@ class workspaceDict(object):
                 "description": cls.format_workspace_description(patient['description']),
                 "tag:tags": {u'items': [u'Chips&SalsaPortal'], u'itemsType': u'AttributeValue'},
                 "patientId": cls.to_str(patient['patientId']),
-                "tumorType": cls.to_str(patient['tumorType'])
+                "tumorTypeShort": cls.to_str(patient['tumorTypeShort']),
+                "tumorTypeLong": cls.to_str(patient['tumorTypeLong'])
             },
             "authorizedDomain": []
         }
@@ -73,7 +74,7 @@ class dataModelDict(object):
     @classmethod
     def create_participant_tsv(cls, patient):
         patientId = patient['patientId']
-        disease = patient['tumorType']
+        disease = patient['tumorTypeShort']
         df = pd.DataFrame(columns=['entity:participant_id', 'disease'], index=[0])
         df.loc[0, 'entity:participant_id'] = patientId
         df.loc[0, 'disease'] = disease
@@ -90,7 +91,7 @@ class dataModelDict(object):
         df.loc[0, 'entity:sample_id'] = tumor_sample
         df.loc[1, 'entity:sample_id'] = normal_sample
         df.loc[:, 'participant_id'] = patient['patientId']
-        df.loc[:, 'disease'] = patient['tumorType']
+        df.loc[:, 'disease'] = patient['tumorTypeShort']
         return cls.df_to_str(df)
 
     @classmethod
@@ -149,7 +150,7 @@ class patientTable(object):
         df.loc[0, 'url'] = cls.create_workspace_url(namespace_, name_)
         df.loc[0, 'createdDate'] = str(created_date_)
         df.loc[0, 'time'] = cls.convert_time(df.loc[0, 'createdDate'])
-        df.loc[0, 'tumorType'] = attributes_['tumorType']
+        df.loc[0, 'tumorType'] = attributes_['tumorTypeLong']
         df.loc[0, 'patientId'] = attributes_['patientId']
         df.loc[0, 'description'] = attributes_['description']
         df.loc[0, 'runningJobs'] = submission_['runningSubmissionsCount']
@@ -166,3 +167,34 @@ class patientTable(object):
             patientTable = patientTable.append(cls.format_workspace(workspace_), ignore_index = True)
 
         return patientTable.sort_values(['createdDate'], ascending = False)
+
+class oncoTree(object):
+    # http://oncotree.mskcc.org/oncotree/#/home oncotree_2017_06_21
+    oncotreePath='app/static/files/oncotree_chipssalsa_dict.txt'
+
+    @classmethod
+    def import_oncotree(cls):
+        return pd.read_csv(cls.oncotreePath, sep='\t')
+
+    @classmethod
+    def return_tumorTypes(cls):
+        df = cls.import_oncotree()
+        return df['tumorType'].tolist()
+
+    @classmethod
+    def create_oncoTree_unicode(cls):
+        tumorTypeList = cls.return_tumorTypes()
+        unicode_list = []
+        for ontology in tumorTypeList:
+            unicode_list.append(unicode(ontology, errors='ignore'))
+        return unicode_list
+
+    @staticmethod
+    def extract_shortcode(ontology):
+        shortcode = str(ontology).split('(')[1].split(')')[0]
+        return unicode(shortcode)
+
+    @staticmethod
+    def extract_longcode(ontology):
+        longcode = str(ontology).split(' (')[0]
+        return unicode(longcode)

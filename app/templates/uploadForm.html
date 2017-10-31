@@ -25,6 +25,8 @@
         </div>
         <div class="form-group col-md-4">
             <label for="billingProject">FireCloud Billing Project:</label>
+            <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#billingModal"></span>
+            {% include "modals/billingModal.html" %}
             <select class="form-control" name="billingProject" id="billingProject">
                 {% for billingAccount in user_dict['firecloud_billing'] %}
                     <option> {{ billingAccount[1] }} </option>
@@ -40,6 +42,8 @@
     <div class="form-row">
         <div class="form-group col-md-12">
             <label for="description">Patient Description:</label>
+             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#descriptionModal"></span>
+            {% include "modals/descriptionModal.html" %}
             <textarea class="form-control" name="description" id="description" rows="5"></textarea>
         </div>
     </div>

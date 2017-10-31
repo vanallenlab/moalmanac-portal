@@ -115,7 +115,7 @@ class dataModelDict(object):
         return cls.df_to_str(df)
 
 class patientTable(object):
-    patientTable_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorType', 'patientId',
+    patientTable_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorTypeShort', 'tumorTypeLong' 'patientId',
                          'description', 'runningJobs', 'completed']
 
     @staticmethod
@@ -150,7 +150,8 @@ class patientTable(object):
         df.loc[0, 'url'] = cls.create_workspace_url(namespace_, name_)
         df.loc[0, 'createdDate'] = str(created_date_)
         df.loc[0, 'time'] = cls.convert_time(df.loc[0, 'createdDate'])
-        df.loc[0, 'tumorType'] = attributes_['tumorTypeLong']
+        df.loc[0, 'tumorTypeShort'] = attributes_['tumorTypeShort']
+        df.loc[0, 'tumorTypeLong'] = attributes_['tumorTypeLong']
         df.loc[0, 'patientId'] = attributes_['patientId']
         df.loc[0, 'description'] = attributes_['description']
         df.loc[0, 'runningJobs'] = submission_['runningSubmissionsCount']

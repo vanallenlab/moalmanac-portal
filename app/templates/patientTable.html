@@ -9,17 +9,14 @@
         </div>
         <div class="panel-body">
             <div class="col-sm-3">
-                {% if (patient_table.loc[index, 'runningJobs'] == 0) and (patient_table.loc[index, 'completed'] == False) %}
-                    <button type="button" class="btn btn-warning btn-block disabled" style="cursor:default;">
-                        <span class="glyphicon glyphicon-alert"></span>&nbsp;&nbsp;No running jobs</button>
-                {% elif (patient_table.loc[index, 'runningJobs'] == 1) %}
-                    <button type="button" class="btn btn-muted btn-block disabled" style="cursor:default;">
+                {% if (patient_table.loc[index, 'runningJobs'] == 1) %}
+                    <button type="button" class="btn btn-muted btn-block" style="cursor:default;">
                         <span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;Running...</button>
                 {% elif (patient_table.loc[index, 'runningJobs'] == 0) and (patient_table.loc[index, 'completed']) %}
                     <button type="button" class="btn btn-success btn-block">
                         <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;View the Report</button>
                 {% else %}
-                    <button type="button" class="btn btn-danger btn-block disabled" style="cursor:default;">
+                    <button type="button" class="btn btn-danger btn-block" style="cursor:default;">
                         <span class="glyphicon glyphicon-alert"></span>&nbsp;&nbsp;Something went wrong!</button>
                 {% endif %}
                 <a href="{{ patient_table.loc[index, 'url'] }}" class="btn btn-default btn-block" role="button" target="_blank">

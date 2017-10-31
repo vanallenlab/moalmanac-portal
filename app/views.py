@@ -27,7 +27,7 @@ google = oauth.remote_app('google',
                           consumer_key=GOOGLE_CLIENT_ID,
                           consumer_secret=GOOGLE_CLIENT_SECRET,
                           request_token_params={
-                              'scope': 'email',
+                              'scope': ['email', 'https://www.googleapis.com/auth/cloud-platform'],
                           },
                           request_token_url=None,
                           base_url='https://www.googleapis.com/oauth2/v1/',
@@ -35,6 +35,9 @@ google = oauth.remote_app('google',
                           access_token_url='https://accounts.google.com/o/oauth2/token',
                           authorize_url='https://accounts.google.com/o/oauth2/auth'
                           )
+
+# https://cloud.google.com/compute/docs/access/service-accounts
+# https://google-auth.readthedocs.io/en/latest/user-guide.html#service-account-private-key-files
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
@@ -87,6 +90,7 @@ def upload():
         return redirect(url_for('firecloud_down'))
 
     access_token = session.get('google_token')[0]
+    credentials = session.get('credentials')
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
     user_dict = userDict.populate_googleauth(user_dict, google)
     user_dict = firecloud_functions.populate_user(user_dict, access_token)
@@ -166,7 +170,10 @@ def authorized():
             request.args['error_reason'],
             request.args['error_description']
         )
+
+    print resp
     session['google_token'] = (resp['access_token'], '')
+    session['credentials'] = resp
     return redirect(url_for('index'))
 
 @google.tokengetter

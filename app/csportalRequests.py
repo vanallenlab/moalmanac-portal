@@ -2,6 +2,8 @@ import requests
 import json
 
 from google.cloud import storage
+import google.oauth2.credentials
+
 from dictManager import dataModelDict, statusDict, workspaceDict, patientTable
 
 class firecloud_requests(object):
@@ -79,13 +81,18 @@ class gcloud_requests(object):
                       headers={'content-type': 'application/x-www-form-urlencoded'})
 
     @staticmethod
-    def initialize_bucket(workspace_dict):
-        gcs = storage.Client()
+    def generate_credentials(access_token):
+        credentials = google.oauth2.credentials.Credentials(access_token)
+        return credentials
+
+    @classmethod
+    def initialize_bucket(cls, workspace_dict, credentials):
+        gcs = storage.Client(credentials=credentials)
         bucket = gcs.get_bucket(workspace_dict['bucketHandle'].split('/')[2])
         return bucket
 
-    @staticmethod
-    def upload_file(gsBucket, file):
+    @classmethod
+    def upload_file(cls, gsBucket, file, credentials):
         blob = gsBucket.blob(file.filename)
         blob.upload_from_string(
             file.read(),
@@ -93,13 +100,14 @@ class gcloud_requests(object):
         )
 
     @classmethod
-    def upload_inputs(cls, patient, workspace_dict):
-        gsBucket = cls.initialize_bucket(workspace_dict)
+    def upload_inputs(cls, patient, workspace_dict, access_token):
+        credentials = cls.generate_credentials(access_token)
+        gsBucket = cls.initialize_bucket(workspace_dict, credentials)
         handles = ['snvHandle', 'indelHandle', 'segHandle', 'fusionHandle',
                    'burdenHandle', 'germlineHandle', 'dnarnaHandle']
         for handle_ in handles:
             if patient[handle_].filename != '':
-                cls.upload_file(gsBucket, patient[handle_])
+                cls.upload_file(gsBucket, patient[handle_], credentials)
 
 class process_requests(firecloud_requests):
     @staticmethod
@@ -152,8 +160,8 @@ class launch_requests(object):
         return workspace_dict
 
     @staticmethod
-    def launch_upload_to_googleBucket(patient, workspace_dict):
-        gcloud_requests.upload_inputs(patient, workspace_dict)
+    def launch_upload_to_googleBucket(patient, workspace_dict, access_token):
+        gcloud_requests.upload_inputs(patient, workspace_dict, access_token)
 
     @staticmethod
     def launch_update_datamodel(access_token, patient, workspace_dict):
@@ -179,7 +187,7 @@ class launch_requests(object):
     @classmethod
     def launch_csPortal(cls, access_token, patient):
         workspace_dict = cls.launch_create_new_workspace(access_token, patient)
-        cls.launch_upload_to_googleBucket(patient, workspace_dict)
+        cls.launch_upload_to_googleBucket(patient, workspace_dict, access_token)
         cls.launch_update_datamodel(access_token, patient, workspace_dict)
         cls.launch_copy_method(access_token, workspace_dict)
         cls.launch_method_submission(access_token, workspace_dict, patient)

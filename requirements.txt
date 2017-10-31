@@ -7,3 +7,5 @@ wtforms==2.1
 flask==0.12.2
 flask_bootstrap==3.3.7.1
 flask_oauthlib==0.9.4
+gevent==1.2.2
+google_auth_oauthlib==0.1.1

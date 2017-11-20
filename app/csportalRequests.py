@@ -45,7 +45,7 @@ class firecloud_requests(object):
         payload = {
             "configurationNamespace": "breardon",
             "configurationName": "chips",
-            "configurationSnapshotId": 34,
+            "configurationSnapshotId": 36,
             "destinationNamespace": "breardon",
             "destinationName": "chips"}
 

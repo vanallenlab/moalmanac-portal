@@ -11,6 +11,7 @@
         <br>
         <img src="{{ url_for('static', filename = 'img/cs_portal_logo.png') }}" class="img-responsive center-block">
         <br>
+        <br>
         {% if user_dict['user'] != '' %}
             <div class="text-center">
                 <p>Logged in as: {{ user_dict['email'] }}</p>
@@ -19,5 +20,4 @@
         {% endif %}
         {% include "instructions.html" %}
     </div>
-
 {% endblock %}

@@ -6,7 +6,7 @@
             <h4 class="panel-title">
                 {{ patient_table.loc[index, 'patientId'] }} &nbsp;
                 {{ patient_table.loc[index, 'tumorTypeLong'] }}
-                <div class="pull-right">Created on: {{ patient_table.loc[index, 'time'] }} GMT</div></h4>
+                <div class="pull-right">Created on: {{ moment(patient_table.loc[index, 'time']).format('LLL') }}</div></h4>
         </div>
         <div class="panel-body">
             <div class="col-md-3 col-sm-12 col-xs-12">

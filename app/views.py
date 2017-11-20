@@ -2,6 +2,7 @@ import json
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
 from flask_oauthlib.client import OAuth
+from flask_moment import Moment
 from gevent import wsgi
 
 from csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
@@ -20,6 +21,7 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = str(config['secret']['APP_SECRET_KEY'])
 
+moment = Moment(app)
 bootstrap = Bootstrap(app)
 oauth = OAuth(app)
 

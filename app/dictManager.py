@@ -1,4 +1,5 @@
 import pandas as pd
+import moment
 from datetime import datetime
 
 class statusDict(object):
@@ -131,9 +132,8 @@ class patientTable(object):
         return "https://portal.firecloud.org/#workspaces/" + str(namespace) + "/" + str(workspace_name)
 
     @staticmethod
-    def convert_time(createdDate):
-        dt = datetime.strptime(createdDate[0:19], '%Y-%m-%dT%H:%M:%S')
-        return dt.strftime('%B %d %Y %I:%M %p')
+    def convert_time(createdDate):\
+        return datetime.strptime(createdDate, "%Y-%m-%dT%H:%M:%S.%fZ")\
 
     @classmethod
     def format_workspace(cls, workspace):

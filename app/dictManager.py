@@ -132,7 +132,7 @@ class patientTable(object):
         return "https://portal.firecloud.org/#workspaces/" + str(namespace) + "/" + str(workspace_name)
 
     @staticmethod
-    def convert_time(createdDate):\
+    def convert_time(createdDate):
         return datetime.strptime(createdDate, "%Y-%m-%dT%H:%M:%S.%fZ")\
 
     @classmethod

@@ -115,6 +115,25 @@ class dataModelDict(object):
                 df.loc[0, column_] = google_bucket + patient[column_].filename
         return cls.df_to_str(df)
 
+class submissionDict(object):
+    @staticmethod
+    def return_submissionId(json):
+        return str(json['submissionId'])
+
+    @staticmethod
+    def request_to_json(request):
+        return request.json()
+
+    @classmethod
+    def extractSubmissionId(cls, request):
+        json = cls.request_to_json(request)
+        return cls.return_submissionId(json)
+
+    @staticmethod
+    def create_attributesTsv(submissionId):
+        df = pd.DataFrame(submissionId, columns=['workspace:submissionId'], index=[0])
+        return df.to_csv(sep='\t', index=False)
+
 class patientTable(object):
     patientTable_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorTypeShort', 'tumorTypeLong' 'patientId',
                          'description', 'runningJobs', 'completed']

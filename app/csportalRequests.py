@@ -4,7 +4,7 @@ import json
 from google.cloud import storage
 import google.oauth2.credentials
 
-from dictManager import dataModelDict, statusDict, workspaceDict, patientTable
+from dictManager import dataModelDict, statusDict, workspaceDict, submissionDict, patientTable
 
 class firecloud_requests(object):
     # https://api.firecloud.org/
@@ -40,12 +40,20 @@ class firecloud_requests(object):
         return requests.post(request, headers=headers, data=entities)
 
     @staticmethod
+    def post_attributes(headers, workspace_dict, attributes_tsv):
+        headers["content-type"] = "application/x-www-form-urlencoded"
+        attributes = {'attributes': attributes_tsv}
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/importAttributesTSV'
+        return requests.post(request, headers=headers, data=attributes)
+
+    @staticmethod
     def copy_method(headers, workspace_dict):
         headers["content-type"] = "application/json"
         payload = {
             "configurationNamespace": "breardon",
             "configurationName": "chips",
-            "configurationSnapshotId": 36,
+            "configurationSnapshotId": 45,
             "destinationNamespace": "breardon",
             "destinationName": "chips"}
 
@@ -67,7 +75,8 @@ class firecloud_requests(object):
 
         request = "https://api.firecloud.org/api/workspaces/"
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'submissions'
-        return requests.post(request, headers=headers, data=json.dumps(payload))
+        r = requests.post(request, headers=headers, data=json.dumps(payload))
+        return submissionDict.extractSubmissionId(r)
 
     @staticmethod
     def get_workspaces(headers):
@@ -182,7 +191,9 @@ class launch_requests(object):
     @staticmethod
     def launch_method_submission(access_token, workspace_dict, patient):
         headers = firecloud_requests.generate_headers(access_token)
-        firecloud_requests.post_method_submission(headers, workspace_dict, patient)
+        submissionId = firecloud_requests.post_method_submission(headers, workspace_dict, patient)
+        attributesTsv = submissionDict.create_attributesTsv(submissionId)
+        firecloud_requests.post_attributes(headers, workspace_dict, attributesTsv)
 
     @classmethod
     def launch_csPortal(cls, access_token, patient):

@@ -11,7 +11,7 @@
         <div class="panel-body">
             <div class="col-md-3 col-sm-12 col-xs-12">
                 {% if (patient_table.loc[index, 'runningJobs'] == 1) %}
-                    <button type="button" class="btn btn-muted btn-block" style="cursor:default;">
+                    <button type="button" class="btn btn-warning btn-block" style="cursor:default;">
                         <span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;Running...</button>
                 {% elif (patient_table.loc[index, 'runningJobs'] == 0) and (patient_table.loc[index, 'completed']) %}
                     <button type="button" class="btn btn-success btn-block">

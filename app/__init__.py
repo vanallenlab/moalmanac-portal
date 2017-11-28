@@ -182,7 +182,7 @@ def authorized():
 def get_access_token():
     return session.get('google_token')
 
-if __name__ == "__main__":
-    app.run(threaded=True)
+#if __name__ == "__main__":
+#    app.run(threaded=True)
 #    server = wsgi.WSGIServer(('localhost', 5000), app)
 #    server.serve_forever()

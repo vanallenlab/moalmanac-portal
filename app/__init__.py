@@ -9,7 +9,7 @@ from csportalRequests import firecloud_functions, firecloud_requests, gcloud_req
 from dictManager import statusDict, userDict, oncoTree
 from forms import UploadForm
 
-with open('src/config_secrets.json') as data_file:
+with open('app/config_secrets.json') as data_file:
     config = json.load(data_file)
 
 GOOGLE_CLIENT_ID = str(config['secret']['GOOGLE_CLIENT_ID'])

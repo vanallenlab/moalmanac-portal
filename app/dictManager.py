@@ -32,7 +32,7 @@ class userDict(object):
 class workspaceDict(object):
     @staticmethod
     def format_workspace_description(description):
-        return unicode(description.replace("\r\n", "\n"))
+        return str(description.replace("\r\n", "\n"))
 
     @staticmethod
     def to_str(notstring):
@@ -236,19 +236,19 @@ class oncoTree(object):
         return df['tumorType'].tolist()
 
     @classmethod
-    def create_oncoTree_unicode(cls):
+    def create_oncoTree(cls):
         tumorTypeList = cls.return_tumorTypes()
-        unicode_list = []
+        list_ = []
         for ontology in tumorTypeList:
-            unicode_list.append(unicode(ontology, errors='ignore'))
-        return unicode_list
+            list_.append(str(ontology))
+        return list_
 
     @classmethod
     def extract_shortcode(cls, ontology):
         oncotree = cls.return_tumorTypes()
         if ontology in oncotree:
             shortcode = str(ontology).split('(')[1].split(')')[0]
-            return unicode(shortcode)
+            return str(shortcode)
         else:
             return ontology
 
@@ -257,6 +257,6 @@ class oncoTree(object):
         oncotree = cls.return_tumorTypes()
         if ontology in oncotree:
             longcode = str(ontology).split(' (')[0]
-            return unicode(longcode)
+            return str(longcode)
         else:
             return ontology

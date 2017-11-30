@@ -100,6 +100,7 @@ class gcloud_requests(object):
     @staticmethod
     def generate_credentials(access_token):
         credentials = google.oauth2.credentials.Credentials(access_token)
+        print(access_token)
         return credentials
 
     @classmethod

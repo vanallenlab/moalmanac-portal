@@ -175,7 +175,7 @@ class patientTable(object):
 
     @staticmethod
     def create_reportUrl(bucketName, submissionId, workflowId, patientId):
-        url = 'https://api.firecloud.org/cookie-authed/download/b/' + bucketName + '/o/' + submissionId + '/CHIPS/' + workflowId
+        url = 'https://storage.cloud.google.com/' + bucketName + '/' + submissionId + '/CHIPS/' + workflowId
         url += '/call-chipsTask/' + patientId + '.report.html'
         return url
 

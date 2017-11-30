@@ -8,21 +8,27 @@
 
 {% block page_content %}
     <div class="container">
+        <div class="row col-xs-10">
         <h2>New Patient Upload</h2>
-
         <div class="well text-muted">
-            <h4>Data File Storage and Workspaces</h4>
-            <p>
-                By clicking "Upload New Patient", a FireCloud workspace will be created under your specified FireCloud
-                Billing Project and your provided files will be uploaded to the corresponding Google bucket. Permissions
-                to this new workspace are specified by your FireCloud billing project.
-                <br><br>
-                You also agree to the <a href="http://vanallenlab.dana-farber.org/" target="_blank">Van Allen Laboratory</a>
-                contacting you via e-mail requesting feedback on your experience using CHIPS & SALSA and the CHIPS & SALSA Portal.
-            </p>
+                <p>
+                    Upon clicking "Upload New Patient", a FireCloud workspace will be created under your specified
+                    FireCloud Billing Project and your provided files will be uploaded to the corresponding Google bucket.
+                    Permissions to this new workspace are specified by your FireCloud billing project.
+                </p>
+                <p><strong>
+                    Neither Dana-Farber Cancer Institute, The Broad Institute of MIT & Harvard, nor the
+                    Van Allen Laboratory will have access to your data, whether uploaded or produced by this portal.
+                </strong></p>
+                <p>
+                    By submitting this form you agree to have your e-mail address and time of submission recorded.
+                    You also agree to the <a href="http://vanallenlab.dana-farber.org/" target="_blank">Van Allen Laboratory</a>
+                    contacting you via e-mail requesting feedback on your experience using CHIPS & SALSA and the CHIPS & SALSA Portal.
+                </p>
+            </div>
+
+            {% include "uploadForm.html" %}
+
         </div>
-
-        {% include "uploadForm.html" %}
-
     </div>
 {% endblock %}

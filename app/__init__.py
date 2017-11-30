@@ -92,9 +92,7 @@ def upload():
         return redirect(url_for('firecloud_down'))
 
     access_token = session.get('google_token')[0]
-    print(access_token)
     credentials = session.get('credentials')
-    print(credentials)
     status_dict = firecloud_functions.populate_status(status_dict, access_token)
     user_dict = userDict.populate_googleauth(user_dict, google)
     user_dict = firecloud_functions.populate_user(user_dict, access_token)

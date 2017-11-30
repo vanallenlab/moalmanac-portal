@@ -4,7 +4,7 @@ import json
 from google.cloud import storage
 import google.oauth2.credentials
 
-from dictManager import dataModelDict, statusDict, workspaceDict, submissionDict, patientTable
+from .dictManager import dataModelDict, statusDict, workspaceDict, submissionDict, patientTable
 
 class firecloud_requests(object):
     # https://api.firecloud.org/
@@ -77,6 +77,14 @@ class firecloud_requests(object):
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'submissions'
         r = requests.post(request, headers=headers, data=json.dumps(payload))
         return submissionDict.extractSubmissionId(r)
+
+    @staticmethod
+    def get_monitor_submission(headers, namespace, name, submissionId):
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += namespace + '/' + name + '/'
+        request += 'submissions/' + submissionId
+        r = requests.get(request, headers=headers)
+        return submissionDict.extractWorkflowId(r)
 
     @staticmethod
     def get_workspaces(headers):
@@ -158,7 +166,7 @@ class launch_requests(object):
         headers = firecloud_requests.generate_headers(access_token)
         workspaces = firecloud_requests.get_workspaces(headers)
         workspaces_json = workspaces.json()
-        return patientTable.generate_patientTable(workspaces_json)
+        return patientTable.generate_patientTable(workspaces_json, headers)
 
     @staticmethod
     def launch_create_new_workspace(access_token, patient):
@@ -192,6 +200,7 @@ class launch_requests(object):
     def launch_method_submission(access_token, workspace_dict, patient):
         headers = firecloud_requests.generate_headers(access_token)
         submissionId = firecloud_requests.post_method_submission(headers, workspace_dict, patient)
+        #workflowId = firecloud_requests.get_monitor_submission(headers, workspace_dict, submissionId)
         attributesTsv = submissionDict.create_attributesTsv(submissionId)
         firecloud_requests.post_attributes(headers, workspace_dict, attributesTsv)
 

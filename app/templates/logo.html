@@ -1,0 +1,11 @@
+<div class="row">
+    <img src="{{ url_for('static', filename = 'img/cs_portal_logo.png') }}" class="center-block" width="50%"><br>
+    <div class="text-center">
+        <p class="lead text-muted" style="font-size: 14pt;">
+            A cloud-based web portal for accessible clinical interpretation of integrative cancer genomics.
+        </p>
+        {% if user_dict['user'] != '' %}
+            <p class="lead text-muted" style="font-size: 12pt;">Logged in as: {{ user_dict['email'] }}</p>
+        {% endif %}
+    </div>
+</div>

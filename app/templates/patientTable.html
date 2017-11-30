@@ -9,7 +9,7 @@
                 <div class="pull-right">Created on: {{ moment(patient_table.loc[index, 'time']).format('LLL') }}</div></h4>
         </div>
         <div class="panel-body">
-            <div class="col-md-3 col-sm-12 col-xs-12">
+            <div class="col-md-4 col-sm-12 col-xs-12">
                 {% if (patient_table.loc[index, 'runningJobs'] == 1) %}
                     <button type="button" class="btn btn-warning btn-block" style="cursor:default;">
                         <span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;Running...</button>
@@ -24,7 +24,7 @@
                     <a href="{{ patient_table.loc[index, 'url'] }}" class="btn btn-default btn-block" role="button" target="_blank">
                         <span class="glyphicon glyphicon-cloud"></span>&nbsp;&nbsp;View FireCloud Workspace</a>
             </div>
-            <div class="col-md-9 col-sm-12 col-xs-12">
+            <div class="col-md-8 col-sm-12 col-xs-12">
                 <p style="white-space: pre-wrap;">{{ patient_table.loc[index, 'description'] }}</p>
             </div>
         </div>

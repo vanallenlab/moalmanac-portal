@@ -1,6 +1,8 @@
 import pandas as pd
 import moment
 from datetime import datetime
+import requests
+#from csportalRequests import firecloud_requests
 
 class statusDict(object):
     @staticmethod
@@ -117,21 +119,30 @@ class dataModelDict(object):
 
 class submissionDict(object):
     @staticmethod
+    def request_to_json(request):
+        return request.json()
+
+    @staticmethod
     def return_submissionId(json):
         return str(json['submissionId'])
 
     @staticmethod
-    def request_to_json(request):
-        return request.json()
+    def return_workflowId(json):
+        return str(json['workflows'][0]['workflowId'])
 
     @classmethod
     def extractSubmissionId(cls, request):
         json = cls.request_to_json(request)
         return cls.return_submissionId(json)
 
+    @classmethod
+    def extractWorkflowId(cls, request):
+        json = cls.request_to_json(request)
+        return cls.return_workflowId(json)
+
     @staticmethod
     def create_attributesTsv(submissionId):
-        df = pd.DataFrame(submissionId, columns=['workspace:submissionId'], index=[0])
+        df = pd.DataFrame({'workspace:submissionId':submissionId}, index=[0])
         return df.to_csv(sep='\t', index=False)
 
 class patientTable(object):
@@ -154,8 +165,22 @@ class patientTable(object):
     def convert_time(createdDate):
         return datetime.strptime(createdDate, "%Y-%m-%dT%H:%M:%S.%fZ")\
 
+    @staticmethod
+    def get_monitor_submission(headers, namespace, name, submissionId):
+        request = "https://api.firecloud.org/api/workspaces/"
+        request += namespace + '/' + name + '/'
+        request += 'submissions/' + submissionId
+        r = requests.get(request, headers=headers)
+        return submissionDict.extractWorkflowId(r)
+
+    @staticmethod
+    def create_reportUrl(bucketName, submissionId, workflowId, patientId):
+        url = 'https://api.firecloud.org/cookie-authed/download/b/' + bucketName + '/o/' + submissionId + '/CHIPS/' + workflowId
+        url += '/call-chipsTask/' + patientId + '.report.html'
+        return url
+
     @classmethod
-    def format_workspace(cls, workspace):
+    def format_workspace(cls, workspace, headers):
         workspace_values = workspace['workspace']
         namespace_ = workspace_values['namespace']
         name_ = workspace_values['name']
@@ -167,25 +192,34 @@ class patientTable(object):
         df.loc[0, 'namespace'] = str(namespace_)
         df.loc[0, 'name'] = str(name_)
         df.loc[0, 'url'] = cls.create_workspace_url(namespace_, name_)
+        df.loc[0, 'bucketName'] = str(workspace_values['bucketName'])
         df.loc[0, 'createdDate'] = str(created_date_)
         df.loc[0, 'time'] = cls.convert_time(df.loc[0, 'createdDate'])
-        df.loc[0, 'tumorTypeShort'] = attributes_['tumorTypeShort']
+        df.loc[0, 'tumorTypeShort'] = attributes_['tumorTypeShort'].upper()
         df.loc[0, 'tumorTypeLong'] = attributes_['tumorTypeLong']
         df.loc[0, 'patientId'] = attributes_['patientId']
         df.loc[0, 'description'] = attributes_['description']
+        df.loc[0, 'submissionId'] = attributes_['submissionId']
         df.loc[0, 'runningJobs'] = submission_['runningSubmissionsCount']
         df.loc[0, 'completed'] = 'lastSuccessDate' in submission_.keys()
+        df.loc[0, 'workflowId'] = ''
+        df.loc[0, 'reportUrl'] = ''
+        if df.loc[0, 'completed']:
+            df.loc[0, 'workflowId'] = cls.get_monitor_submission(headers, df.loc[0, 'namespace'], df.loc[0, 'name'], df.loc[0, 'submissionId'])
+            df.loc[0, 'reportUrl'] = cls.create_reportUrl(df.loc[0, 'bucketName'], df.loc[0, 'submissionId'],
+                                                          df.loc[0, 'workflowId'], df.loc[0, 'patientId'])
         return df
 
     @classmethod
-    def generate_patientTable(cls, all_workspaces):
+    def generate_patientTable(cls, all_workspaces, headers):
         tagged_workspaces = cls.subset_tagged_workspaces(all_workspaces)
         csPortal_workspaces = cls.subset_csPortal_workspaces(tagged_workspaces)
 
         patientTable = pd.DataFrame(columns = cls.patientTable_cols)
         for workspace_ in csPortal_workspaces:
-            patientTable = patientTable.append(cls.format_workspace(workspace_), ignore_index = True)
+            patientTable = patientTable.append(cls.format_workspace(workspace_, headers), ignore_index = True)
 
+            patientTable.to_csv('patientTable.txt', sep = '\t')
         return patientTable.sort_values(['createdDate'], ascending = False)
 
 class oncoTree(object):

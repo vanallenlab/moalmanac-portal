@@ -5,9 +5,9 @@ from flask_oauthlib.client import OAuth
 from flask_moment import Moment
 from gevent import wsgi
 
-from csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
-from dictManager import statusDict, userDict, oncoTree
-from forms import UploadForm
+from .csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
+from .dictManager import statusDict, userDict, oncoTree
+from .forms import UploadForm
 
 with open('app/config_secrets.json') as data_file:
     config = json.load(data_file)
@@ -173,7 +173,6 @@ def authorized():
             request.args['error_description']
         )
 
-    print resp
     session['google_token'] = (resp['access_token'], '')
     session['credentials'] = resp
     return redirect(url_for('index'))

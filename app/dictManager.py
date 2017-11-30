@@ -218,8 +218,6 @@ class patientTable(object):
         patientTable = pd.DataFrame(columns = cls.patientTable_cols)
         for workspace_ in csPortal_workspaces:
             patientTable = patientTable.append(cls.format_workspace(workspace_, headers), ignore_index = True)
-
-            patientTable.to_csv('patientTable.txt', sep = '\t')
         return patientTable.sort_values(['createdDate'], ascending = False)
 
 class oncoTree(object):

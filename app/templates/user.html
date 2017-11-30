@@ -8,16 +8,15 @@
 
 {% block page_content %}
     <div class="container">
-        <br>
-        <img src="{{ url_for('static', filename = 'img/cs_portal_logo.png') }}" class="img-responsive center-block">
-        <br>
-        <div class="text-center">
-            <p>Logged in as: {{ user_dict['email'] }}</p><br>
+        {% include "logo.html" %}
+        <div class="row text-center">
             <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg" role="button">Upload New Patient</a>
         </div>
 
-        <div class="container">
-            {% include "patientTable.html" %}
+        <div class="row">
+            <div class="col-xs-1"></div>
+            <div class="col-xs-10">{% include "patientTable.html" %}</div>
+            <div class="col-xs-1"></div>
         </div>
 
     </div>

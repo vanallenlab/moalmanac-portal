@@ -9,7 +9,7 @@ flask_bootstrap==3.3.7.1
 flask_oauthlib==0.9.4
 flask_moment==0.5.2
 gevent==1.2.2
-google-cloud
+google-cloud==0.26.0
 google_auth_oauthlib==0.1.1
 urllib3==1.22
 moment==0.8.2

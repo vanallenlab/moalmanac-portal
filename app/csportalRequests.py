@@ -100,11 +100,11 @@ class gcloud_requests(object):
     @staticmethod
     def generate_credentials(access_token):
         credentials = google.oauth2.credentials.Credentials(access_token)
-        print(access_token)
         return credentials
 
     @classmethod
     def initialize_bucket(cls, workspace_dict, credentials):
+        credentials = google.oauth2.credentials.Credentials(access_token)
         gcs = storage.Client(credentials=credentials)
         bucket = gcs.get_bucket(workspace_dict['bucketHandle'].split('/')[2])
         return bucket

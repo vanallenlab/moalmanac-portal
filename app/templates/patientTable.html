@@ -5,7 +5,8 @@
         <div class="panel-heading">
             <h4 class="panel-title">
                 {{ patient_table.loc[index, 'patientId'] }} &nbsp;
-                {{ patient_table.loc[index, 'tumorTypeLong'] }}
+                {{ patient_table.loc[index, 'tumorTypeLong'] }} &nbsp;
+                ({{ patient_table.loc[index, 'tumorTypeShort'] }})
                 <div class="pull-right">Created on: {{ moment(patient_table.loc[index, 'time']).format('LLL') }}</div></h4>
         </div>
         <div class="panel-body">

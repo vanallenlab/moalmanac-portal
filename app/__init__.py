@@ -8,6 +8,7 @@ from gevent import wsgi
 from .csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
 from .dictManager import statusDict, userDict, oncoTree
 from .forms import UploadForm
+from .log import append_db
 
 with open('app/config_secrets.json') as data_file:
     config = json.load(data_file)
@@ -118,6 +119,7 @@ def upload():
         patient['tumorTypeLong'] = oncoTree.extract_longcode(patient['tumorType'])
 
         launch_requests.launch_csPortal(access_token, patient)
+        append_db.record(user_dict['email'])
 
         return redirect(url_for('user'))
 

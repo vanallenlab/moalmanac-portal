@@ -1,7 +1,6 @@
 import pandas as pd
 import moment
 import json
-import google.oauth2.credentials
 
 from datetime import datetime
 
@@ -37,11 +36,6 @@ class UserDict(object):
 
 
 class Credentials(object):
-    @staticmethod
-    def authorize_credentials(flask_credentials):
-        return google.oauth2.credentials.Credentials(
-            **flask_credentials)
-
     @staticmethod
     def credentials_to_dict(credentials):
         return {'token': credentials.token, 'refresh_token': credentials.refresh_token,

@@ -1,5 +1,6 @@
 import json
 import requests
+import google.oauth2.credentials
 import app.dict_manager as dict_manager
 from google.cloud import storage
 
@@ -13,6 +14,11 @@ class GCloud(object):
     def get_email(cls, header):
         request = "https://www.googleapis.com/oauth2/v2/userinfo"
         return requests.get(request, headers=header)
+
+    @staticmethod
+    def authorize_credentials(flask_credentials):
+        return google.oauth2.credentials.Credentials(
+            **flask_credentials)
 
     @staticmethod
     def revoke_token(token):

@@ -11,16 +11,7 @@ import app.dict_manager as dict_manager
 import app.forms as forms
 import app.log as log
 
-#from flask import Flask, redirect, render_template, request, session, url_for
-#import flask_bootstrap
-#from flask_bootstrap import Bootstrap
-#from flask_moment import Moment
-#from gevent import wsgi
-
-#from .csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
-#from .dictManager import statusDict, userDict, oncoTree
-#from .forms import UploadForm
-#from .log import append_db
+from time import time
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
 with open(CLIENT_SECRETS_FILE) as data_file:
@@ -138,7 +129,7 @@ def oauth2callback():
 
 @app.route('/logout')
 def logout():
-    credentials = dict_manager.Credentials.authorize_credentials(flask.session['credentials'])
+    credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
     r = portal_requests.GCloud.revoke_token(credentials.token) # Better handling for error codes
 
     if 'credentials' in flask.session:
@@ -159,9 +150,13 @@ def initialize_page():
         flask.session['user_dict'] = dict_manager.UserDict.new_dict()
 
     if 'credentials' in flask.session:
-        credentials = dict_manager.Credentials.authorize_credentials(flask.session['credentials'])
-        request = google.auth.transport.requests.Request()
-        credentials.refresh(request)
+        credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
+        if credentials.expired or not credentials.valid:
+            return flask.redirect(flask.url_for('logout'))
+        else:
+            request = google.auth.transport.requests.Request()
+            credentials.refresh(request)
+
         if flask.session['user_dict']['email'] == '':
             flask.session['status_dict'] = portal_requests.Launch.update_status_dict(
                 flask.session['status_dict'], credentials.token)

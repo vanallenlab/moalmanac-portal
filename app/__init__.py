@@ -1,189 +1,172 @@
 import json
-from flask import Flask, redirect, render_template, request, session, url_for
-from flask_bootstrap import Bootstrap
-from flask_oauthlib.client import OAuth
-from flask_moment import Moment
-from gevent import wsgi
+import flask
+import flask_bootstrap
+import flask_moment
 
-from .csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
-from .dictManager import statusDict, userDict, oncoTree
-from .forms import UploadForm
-from .log import append_db
+import google_auth_oauthlib.flow
+import google.auth.transport.requests
 
-with open('app/config_secrets.json') as data_file:
+import app.portal_requests as portal_requests
+import app.dict_manager as dict_manager
+import app.forms as forms
+import app.log as log
+
+#from flask import Flask, redirect, render_template, request, session, url_for
+#import flask_bootstrap
+#from flask_bootstrap import Bootstrap
+#from flask_moment import Moment
+#from gevent import wsgi
+
+#from .csportalRequests import firecloud_functions, firecloud_requests, gcloud_requests, launch_requests
+#from .dictManager import statusDict, userDict, oncoTree
+#from .forms import UploadForm
+#from .log import append_db
+
+CLIENT_SECRETS_FILE = 'client_secret.json'
+with open(CLIENT_SECRETS_FILE) as data_file:
     config = json.load(data_file)
 
-GOOGLE_CLIENT_ID = str(config['secret']['GOOGLE_CLIENT_ID'])
-GOOGLE_CLIENT_SECRET = str(config['secret']['GOOGLE_CLIENT_SECRET'])
-REDIRECT_URL = '/oauth2callback'
+SCOPES = ['email', 'https://www.googleapis.com/auth/cloud-platform']
+API_SERVICE_NAME = 'cloud-platform'
+API_VERSION = 'v1'
 
 CSRF_ENABLED = True
-app = Flask(__name__)
-app.debug = True
-app.secret_key = str(config['secret']['APP_SECRET_KEY'])
+app = flask.Flask(__name__)
+app.secret_key = str(config['web']['client_secret'])
 
-moment = Moment(app)
-bootstrap = Bootstrap(app)
-oauth = OAuth(app)
+moment = flask_moment.Moment(app)
+bootstrap = flask_bootstrap.Bootstrap(app)
 
-google = oauth.remote_app('google',
-                          consumer_key=GOOGLE_CLIENT_ID,
-                          consumer_secret=GOOGLE_CLIENT_SECRET,
-                          request_token_params={
-                              'scope': ['email', 'https://www.googleapis.com/auth/cloud-platform'],
-                          },
-                          request_token_url=None,
-                          base_url='https://www.googleapis.com/oauth2/v1/',
-                          access_token_method='POST',
-                          access_token_url='https://accounts.google.com/o/oauth2/token',
-                          authorize_url='https://accounts.google.com/o/oauth2/auth'
-                          )
 
-# https://cloud.google.com/compute/docs/access/service-accounts
-# https://google-auth.readthedocs.io/en/latest/user-guide.html#service-account-private-key-files
-
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    status_dict = statusDict.new_dict()
-    user_dict = userDict.new_dict()
-
-    session['firecloudHealth'] = firecloud_requests.get_health()
-    if not session.get('firecloudHealth'):
-        return redirect(url_for('firecloud_down'))
-
-    if 'google_token' in session:
-        access_token = session.get('google_token')[0]
-        status_dict = firecloud_functions.populate_status(status_dict, access_token)
-        user_dict = userDict.populate_googleauth(user_dict, google)
-
-    if firecloud_functions.evaluate_upload_status(status_dict):
-        # Pass status_dict and user_dict https://stackoverflow.com/questions/17057191/flask-redirect-while-passing-arguments
-        return redirect(url_for('user'))
+    credentials = initialize_page()
+    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
+    if user_ready:
+        return flask.redirect(flask.url_for('user'))
     else:
-        return render_template('index.html', status_dict=status_dict, user_dict=user_dict)
+        return flask.render_template('index.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict'])
 
-@app.route('/user', methods = ['GET', 'POST'])
+@app.route('/user', methods=['GET', 'POST'])
 def user():
-    status_dict = statusDict.new_dict()
-    user_dict = userDict.new_dict()
+    credentials = initialize_page()
+    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
+    if not user_ready:
+        return flask.redirect(flask.url_for('index'))
+    else:
+        patient_table = portal_requests.Launch.list_workspaces(credentials.token)
+        return flask.render_template('user.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict'],
+                                     patient_table=patient_table)
 
-    if 'google_token' not in session:
-        return redirect(url_for('index'))
-
-    if not session.get('firecloudHealth'):
-        return redirect(url_for('firecloud_down'))
-
-    access_token = session.get('google_token')[0]
-    status_dict = firecloud_functions.populate_status(status_dict, access_token)
-    user_dict = userDict.populate_googleauth(user_dict, google)
-    patient_table = launch_requests.launch_list_workspaces(access_token)
-
-    return render_template('user.html', status_dict=status_dict, user_dict=user_dict,
-                           patient_table=patient_table)
 
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():
-    status_dict = statusDict.new_dict()
-    user_dict = userDict.new_dict()
+    credentials = initialize_page()
+    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
+    if not user_ready:
+        return flask.redirect(flask.url_for('index'))
+    else:
+        oncotree_list = dict_manager.Oncotree.create_oncotree()
+        form = forms.UploadForm()
+        form.billingProject.choices = portal_requests.Launch.list_billing_projects(credentials.token)
+        if flask.request.method == 'POST' and form.validate_on_submit():
+            patient = dict_manager.Form.populate_patient(form)
+            portal_requests.Launch.submit_patient(credentials, patient)
+            log.AppendDb.record(flask.session['user_dict']['email'])
 
-    if 'google_token' not in session:
-        return redirect(url_for('index'))
+            return flask.redirect(flask.url_for('user'))
 
-    if not session.get('firecloudHealth'):
-        return redirect(url_for('firecloud_down'))
-
-    access_token = session.get('google_token')[0]
-    credentials = session.get('credentials')
-    status_dict = firecloud_functions.populate_status(status_dict, access_token)
-    user_dict = userDict.populate_googleauth(user_dict, google)
-    user_dict = firecloud_functions.populate_user(user_dict, access_token)
-    oncotree_list = oncoTree.create_oncoTree()
-
-    form = UploadForm()
-    form.billingProject.choices = user_dict['firecloud_billing']
-    if request.method == 'POST' and form.validate_on_submit():
-        patient = {}
-        patient['billingProject'] = form.billingProject.data
-        patient['patientId'] = request.form['patientId']
-        patient['tumorType'] = request.form['tumorType']
-        patient['description'] = form.description.data
-        patient['snvHandle'] = request.files['snvHandle']
-        patient['indelHandle'] = request.files['indelHandle']
-        patient['burdenHandle'] = request.files['burdenHandle']
-        patient['segHandle'] = request.files['segHandle']
-        patient['fusionHandle'] = request.files['fusionHandle']
-        patient['dnarnaHandle'] = request.files['dnarnaHandle']
-        patient['germlineHandle'] = request.files['germlineHandle']
-
-        patient['tumorTypeShort'] = oncoTree.extract_shortcode(patient['tumorType'])
-        patient['tumorTypeLong'] = oncoTree.extract_longcode(patient['tumorType'])
-
-        launch_requests.launch_csPortal(access_token, patient)
-        append_db.record(user_dict['email'])
-
-        return redirect(url_for('user'))
-
-    return render_template('upload.html', status_dict=status_dict, user_dict=user_dict,
-                           form=form, oncotree=oncotree_list)
+        return flask.render_template('upload.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict'],
+                                     billing_projects=form.billingProject.choices,
+                                     form=form,
+                                     oncotree=oncotree_list)
 
 @app.route('/firecloud_down')
 def firecloud_down():
-    status_dict = statusDict.new_dict()
-    user_dict = userDict.new_dict()
+    flask.session['firecloudHealth'] = portal_requests.FireCloud.get_health().ok
+    if flask.session['firecloudHealth']:
+        return flask.redirect(url_for('index'))
+    else:
+        return flask.render_template('firecloud_down.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict'])
 
-    if 'google_token' in session:
-        access_token = session.get('google_token')[0]
-        status_dict = firecloud_functions.populate_status(status_dict, access_token)
-        user_dict = userDict.populate_googleauth(user_dict, google)
-
-    return render_template('firecloud_down.html', status_dict=status_dict, user_dict=user_dict)
 
 @app.errorhandler(404)
 def page_not_found(e):
-    status_dict = statusDict.new_dict()
-    user_dict = userDict.new_dict()
+    credentials = initialize_page()
+    return flask.render_template('404.html',
+                                 status_dict=flask.session['status_dict'],
+                                 user_dict=flask.session['user_dict']), 404
 
-    if not session.get('firecloudHealth'):
-        return redirect(url_for('firecloud_down'))
-
-    if 'google_token' in session:
-        access_token = session.get('google_token')[0]
-        status_dict = firecloud_functions.populate_status(status_dict, access_token)
-        user_dict = userDict.populate_googleauth(user_dict, google)
-
-    return render_template('404.html', status_dict=status_dict, user_dict=user_dict), 404
 
 @app.route('/login')
 def login():
-    callback=url_for('authorized', _external=True)
-    return google.authorize(callback=callback)
+    return flask.redirect(flask.url_for('authorize'))
+
+
+@app.route('/authorize')
+def authorize():
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+    authorization_url, state = flow.authorization_url(
+        access_type='offline', include_granted_scopes='true')
+
+    flask.session['state'] = state
+    return flask.redirect(authorization_url)
+
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    state = flask.session['state']
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(flow.credentials)
+    return flask.redirect(flask.url_for('index'))
+
 
 @app.route('/logout')
 def logout():
-    if 'google_token' in session:
-        access_token = session.get('google_token')[0]
-        gcloud_requests.revoke_token(access_token)
-    session.clear()
-    return redirect(url_for('index'))
+    credentials = dict_manager.Credentials.authorize_credentials(flask.session['credentials'])
+    r = portal_requests.GCloud.revoke_token(credentials.token) # Better handling for error codes
 
-@app.route(REDIRECT_URL)
-def authorized():
-    resp = google.authorized_response()
-    if resp is None:
-        return 'Access_denied: reasons=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
+    if 'credentials' in flask.session:
+        del flask.session['credentials']
+        del flask.session['status_dict']
+        del flask.session['user_dict']
 
-    session['google_token'] = (resp['access_token'], '')
-    session['credentials'] = resp
-    return redirect(url_for('index'))
+    return flask.redirect(flask.url_for('index'))
 
-@google.tokengetter
-def get_access_token():
-    return session.get('google_token')
 
-#if __name__ == "__main__":
-#    app.run(threaded=True)
-#    server = wsgi.WSGIServer(('localhost', 5000), app)
-#    server.serve_forever()
+def initialize_page():
+    flask.session['firecloudHealth'] = portal_requests.FireCloud.get_health().ok
+    if not flask.session['firecloudHealth']:
+        return redirect(url_for('firecloud_down'))
+
+    if 'status_dict' not in flask.session:
+        flask.session['status_dict'] = dict_manager.StatusDict.new_dict()
+        flask.session['user_dict'] = dict_manager.UserDict.new_dict()
+
+    if 'credentials' in flask.session:
+        credentials = dict_manager.Credentials.authorize_credentials(flask.session['credentials'])
+        request = google.auth.transport.requests.Request()
+        credentials.refresh(request)
+        if flask.session['user_dict']['email'] == '':
+            flask.session['status_dict'] = portal_requests.Launch.update_status_dict(
+                flask.session['status_dict'], credentials.token)
+            flask.session['user_dict'] = portal_requests.Launch.update_user_dict(
+                flask.session['user_dict'], credentials.token)
+        return credentials
+    else:
+        return ''

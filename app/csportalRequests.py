@@ -7,7 +7,6 @@ import google.oauth2.credentials
 from .dictManager import dataModelDict, statusDict, workspaceDict, submissionDict, patientTable
 
 class firecloud_requests(object):
-    # https://api.firecloud.org/
     @staticmethod
     def generate_headers(access_token):
         return {"Authorization" : "bearer " + str(access_token)}

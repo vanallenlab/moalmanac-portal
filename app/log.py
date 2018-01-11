@@ -1,19 +1,26 @@
+import os
+import sqlite3
 import dataset
 import moment
 
-class connect_db(object):
-    path = 'submissions.db'
+class ConnectDb(object):
+    path = 'sqlite:///submissions.db'
     table = 'submissions'
 
     @classmethod
     def connect(cls):
         return dataset.connect(cls.path)
 
-    @staticmethod
-    def return_table(db):
-        return db[table]
+    @classmethod
+    def return_table(cls, db):
+        return db[cls.table]
 
-class timestamp(object):
+    @classmethod
+    def create_new_db(cls):
+        conn = sqlite3.connect(cls.path)
+        conn.close()
+
+class TimeStamp(object):
     @staticmethod
     def get_moment():
         return moment.now()
@@ -42,12 +49,12 @@ class timestamp(object):
     def get_second(now):
         return now.format('s')
 
-class append_db():
+class AppendDb(object):
     @classmethod
     def format_dict(cls, email, now):
         return {'email': email,
-                'year': timestamp.get_year(now), 'month': timestamp.get_month(now), 'day': timestamp.get_day(now),
-                'hour': timestamp.get_hour(now), 'minute': timestamp.get_minute(now), 'second': timestamp.get_second(now)
+                'year': TimeStamp.get_year(now), 'month': TimeStamp.get_month(now), 'day': TimeStamp.get_day(now),
+                'hour': TimeStamp.get_hour(now), 'minute': TimeStamp.get_minute(now), 'second': TimeStamp.get_second(now)
                 }
 
     @staticmethod
@@ -56,9 +63,19 @@ class append_db():
 
     @classmethod
     def record(cls, email):
-        now = timestamp.get_moment()
-        dict = format.dict(email, now)
+        now = TimeStamp.get_moment()
+        dict = cls.format_dict(email, now)
 
-        db = connect_db.connect()
-        table = connect_db.return_table(db)
+        if os.path.isfile(ConnectDb.path):
+            ConnectDb.create_new_db()
+
+        db = ConnectDb.connect()
+        table = ConnectDb.return_table(db)
         cls.append_table(table, dict)
+
+class ReadDb(object):
+    @staticmethod
+    def printDb():
+        db = ConnectDb.connect()
+        for submission in db['submissions']:
+            print(submission)

@@ -122,6 +122,7 @@ def oauth2callback():
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
     authorization_response = flask.request.url
     flow.fetch_token(authorization_response=authorization_response)
+    # Add comment for access denied
 
     flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(flow.credentials)
     return flask.redirect(flask.url_for('index'))
@@ -151,11 +152,11 @@ def initialize_page():
 
     if 'credentials' in flask.session:
         credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
-        if credentials.expired or not credentials.valid:
-            return flask.redirect(flask.url_for('logout'))
-        else:
+        try:
             request = google.auth.transport.requests.Request()
             credentials.refresh(request)
+        except google.auth.exceptions.RefreshError as e:
+            return flask.redirect(flask.url_for('login'))
 
         if flask.session['user_dict']['email'] == '':
             flask.session['status_dict'] = portal_requests.Launch.update_status_dict(

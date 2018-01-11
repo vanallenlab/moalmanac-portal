@@ -72,7 +72,7 @@ class PatientTable(object):
     @staticmethod
     def create_report_url(bucket_name, submission_id, workflow_id, patient_id):
         url = "https://storage.cloud.google.com/" + bucket_name + "/" + submission_id + "/CHIPS/"
-        url += workflow_id + "/call-chipsTask/" + patient_id + ".report.html"
+        url += workflow_id + "/call-chipsTask/" + patient_id + ".report.html?authuser=1"
         return url
 
     @classmethod

@@ -125,6 +125,8 @@ def oauth2callback():
     # Add comment for access denied
 
     flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(flow.credentials)
+    flask.session['time_authorized'] = dict_manager.DateTime.datetime_for_session()
+    flask.session['time_authorized_orginal'] = flask.session['time_authorized']
     return flask.redirect(flask.url_for('index'))
 
 
@@ -132,37 +134,50 @@ def oauth2callback():
 def logout():
     credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
     r = portal_requests.GCloud.revoke_token(credentials.token) # Better handling for error codes
-
-    if 'credentials' in flask.session:
-        del flask.session['credentials']
-        del flask.session['status_dict']
-        del flask.session['user_dict']
-
+    flask.session.clear()
     return flask.redirect(flask.url_for('index'))
+
+
+def refresh_token():
+    refreshed_token = portal_requests.Launch.refresh_token(flask.session['credentials'])
+    if refreshed_token == 'failed':
+        flask.session.clear()
+    else:
+        flask.session['credentials']['token'] = refreshed_token
+        flask.session['time_authorized'] = dict_manager.DateTime.datetime_for_session()
+
+
+def update_status_dict(token):
+    flask.session['status_dict'] = portal_requests.Launch.update_status_dict(
+        flask.session['status_dict'], token)
+
+
+def update_user_dict(token):
+    flask.session['user_dict'] = portal_requests.Launch.update_user_dict(
+        flask.session['user_dict'], token)
 
 
 def initialize_page():
     flask.session['firecloudHealth'] = portal_requests.FireCloud.get_health().ok
     if not flask.session['firecloudHealth']:
-        return redirect(url_for('firecloud_down'))
+        return flask.redirect(flask.url_for('firecloud_down'))
+
+    if 'time_authorized' in flask.session:
+        if dict_manager.DateTime.time_to_renew(flask.session['time_authorized']):
+            refresh_token()
 
     if 'status_dict' not in flask.session:
+        flask.session.clear()
         flask.session['status_dict'] = dict_manager.StatusDict.new_dict()
         flask.session['user_dict'] = dict_manager.UserDict.new_dict()
 
     if 'credentials' in flask.session:
         credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
-        try:
-            request = google.auth.transport.requests.Request()
-            credentials.refresh(request)
-        except google.auth.exceptions.RefreshError as e:
-            return flask.redirect(flask.url_for('login'))
-
-        if flask.session['user_dict']['email'] == '':
-            flask.session['status_dict'] = portal_requests.Launch.update_status_dict(
-                flask.session['status_dict'], credentials.token)
-            flask.session['user_dict'] = portal_requests.Launch.update_user_dict(
-                flask.session['user_dict'], credentials.token)
+        flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(credentials)
+        if "danger" in flask.session['status_dict'].values():
+            update_status_dict(credentials.token)
+        if '' in flask.session['user_dict'].values():
+            update_user_dict(credentials.token)
         return credentials
     else:
         return ''

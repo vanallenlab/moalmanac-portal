@@ -3,6 +3,7 @@ import moment
 import json
 
 from datetime import datetime
+from datetime import timedelta
 
 class StatusDict(object):
     @staticmethod
@@ -35,13 +36,44 @@ class UserDict(object):
         return email.split('@')[0]
 
 
+class DateTime(object):
+    dt_format = '%Y-%m-%d_%H:%M:%S'
+
+    @classmethod
+    def dt_to_str(cls, dt):
+        return dt.strftime(cls.dt_format)
+
+    @classmethod
+    def str_to_dt(cls, dtstr):
+        return datetime.strptime(dtstr, cls.dt_format)
+
+    @staticmethod
+    def get_datetime_now():
+        return datetime.now()
+
+    @classmethod
+    def datetime_for_session(cls):
+        dt_now = cls.get_datetime_now()
+        return cls.dt_to_str(dt_now)
+
+    @classmethod
+    def calculate_delta_t(cls, time_authorized):
+        dt_now = cls.get_datetime_now()
+        dt_authorized = cls.str_to_dt(time_authorized)
+        return dt_now - dt_authorized
+
+    @classmethod
+    def time_to_renew(cls, time_authorized):
+        delta_t = cls.calculate_delta_t(time_authorized)
+        return delta_t >= timedelta(seconds=3500)
+
+
 class Credentials(object):
     @staticmethod
     def credentials_to_dict(credentials):
         return {'token': credentials.token, 'refresh_token': credentials.refresh_token,
                 'token_uri': credentials.token_uri, 'client_id': credentials.client_id,
                 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
-
 
 class PatientTable(object):
     patient_table_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorTypeShort', 'tumorTypeLong',

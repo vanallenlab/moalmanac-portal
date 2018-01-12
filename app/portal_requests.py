@@ -27,6 +27,17 @@ class GCloud(object):
         return requests.get(request, headers=headers, params={'token': token})
 
     @staticmethod
+    def refresh_token(credentials):
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+        request = 'https://www.googleapis.com/oauth2/v4/token'
+        params = {
+            'client_id': credentials['client_id'],
+            'client_secret': credentials['client_secret'],
+            'refresh_token': credentials['refresh_token'],
+            'grant_type': 'refresh_token'}
+        return requests.post(request, headers=headers, params=params)
+
+    @staticmethod
     def initialize_bucket(credentials, workspace_dict):
         gcs = storage.Client(credentials=credentials)
         return gcs.get_bucket(workspace_dict['bucketHandle'].split('/')[2])
@@ -232,3 +243,11 @@ class Launch(object):
         cls.update_datamodel(token, patient, workspace_dict)
         cls.copy_method(token, workspace_dict)
         cls.submit_method(token, patient, workspace_dict)
+
+    @staticmethod
+    def refresh_token(credentials):
+        r = GCloud.refresh_token(credentials)
+        if r.status_code == 200:
+            return r.json()['access_token']
+        else:
+            return 'failed'

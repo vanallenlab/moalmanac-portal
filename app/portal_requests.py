@@ -102,7 +102,7 @@ class FireCloud(object):
         payload = {
             "configurationNamespace": "breardon",
             "configurationName": "chips",
-            "configurationSnapshotId": 45,
+            "configurationSnapshotId": 47,
             "destinationNamespace": "breardon",
             "destinationName": "chips"}
 

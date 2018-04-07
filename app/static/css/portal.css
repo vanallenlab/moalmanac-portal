@@ -2,6 +2,11 @@
     color: #A70C36
 }
 
+.jumbotron {
+    background-color: #ffffff;
+    margin-bottom: 0;
+}
+
 * {
     margin: 0;
 }
@@ -33,7 +38,7 @@ footer {
 .status {
     margin: 0px auto;
     text-align: center;
-    width: 45%;
+    width: 50%;
 }
 
 .setup table {

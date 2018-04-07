@@ -144,7 +144,7 @@ class PatientTable(object):
 
 class Oncotree(object):
     # http://oncotree.mskcc.org/oncotree/#/home oncotree_2017_06_21
-    oncotree_path = 'app/static/files/oncotree_chipssalsa_dict.txt'
+    oncotree_path = 'app/static/files/oncotree_dict.txt'
 
     @classmethod
     def import_oncotree(cls):

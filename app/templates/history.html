@@ -32,7 +32,9 @@
                     {% for entry in db %}
                     <tr>
                         <td>
-                            {{ '-'.join([entry['year'], entry['month'], entry['day']]) }}
+                            {{ '-'.join([entry['year'], entry['month'], entry['day']]) + ' ' +
+                            ':'.join([entry['hour'], entry['minute'], entry['second']])
+                            }}
                         </td>
                         <td>
                             {{ entry['email'] }}

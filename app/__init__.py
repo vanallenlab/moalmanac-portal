@@ -2,6 +2,7 @@ import json
 import flask
 import flask_bootstrap
 import flask_moment
+import dataset
 
 import google_auth_oauthlib.flow
 import google.auth.transport.requests
@@ -21,6 +22,10 @@ SCOPES = ['email', 'https://www.googleapis.com/auth/cloud-platform']
 API_SERVICE_NAME = 'cloud-platform'
 API_VERSION = 'v1'
 
+DB = 'sqlite:///submissions.db'
+ADMIN = 'admin'
+db = dataset.connect(DB)
+
 CSRF_ENABLED = True
 app = flask.Flask(__name__)
 app.secret_key = str(config['web']['client_secret'])
@@ -39,6 +44,7 @@ def index():
         return flask.render_template('index.html',
                                      status_dict=flask.session['status_dict'],
                                      user_dict=flask.session['user_dict'])
+
 
 @app.route('/user', methods=['GET', 'POST'])
 def user():
@@ -77,6 +83,21 @@ def upload():
                                      billing_projects=form.billingProject.choices,
                                      form=form,
                                      oncotree=oncotree_list)
+
+
+@app.route('/history')
+def history():
+    credentials = initialize_page()
+    if db[ADMIN].find_one(email=flask.session['user_dict']['email']):
+        return flask.render_template('history.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict'],
+                                     db=db['submissions'])
+    else:
+        return flask.render_template('404.html',
+                                     status_dict=flask.session['status_dict'],
+                                     user_dict=flask.session['user_dict']), 404
+
 
 @app.route('/firecloud_down')
 def firecloud_down():

@@ -34,6 +34,13 @@ moment = flask_moment.Moment(app)
 bootstrap = flask_bootstrap.Bootstrap(app)
 
 
+@app.before_request
+def check_under_maintenance():
+    var_maintenance = 1
+    if var_maintenance == 1:
+        flask.abort(503)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     credentials = initialize_page()
@@ -108,6 +115,14 @@ def firecloud_down():
         return flask.render_template('firecloud_down.html',
                                      status_dict=flask.session['status_dict'],
                                      user_dict=flask.session['user_dict'])
+
+
+@app.errorhandler(503)
+def maintenance(e):
+    credentials = initialize_page()
+    return flask.render_template('503.html',
+                                 status_dict=flask.session['status_dict'],
+                                 user_dict=flask.session['user_dict'])
 
 
 @app.errorhandler(404)

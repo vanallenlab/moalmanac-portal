@@ -18,7 +18,10 @@ CLIENT_SECRETS_FILE = 'client_secret.json'
 with open(CLIENT_SECRETS_FILE) as data_file:
     config = json.load(data_file)
 
-SCOPES = ['email', 'https://www.googleapis.com/auth/cloud-platform']
+SCOPES = ['https://www.googleapis.com/auth/userinfo.email',
+           'https://www.googleapis.com/auth/plus.me',
+           'https://www.googleapis.com/auth/cloud-platform']
+
 API_SERVICE_NAME = 'cloud-platform'
 API_VERSION = 'v1'
 
@@ -36,7 +39,7 @@ bootstrap = flask_bootstrap.Bootstrap(app)
 
 @app.before_request
 def check_under_maintenance():
-    var_maintenance = 1
+    var_maintenance = 0
     if var_maintenance == 1:
         flask.abort(503)
 

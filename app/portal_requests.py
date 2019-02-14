@@ -102,13 +102,13 @@ class FireCloud(object):
     def copy_method(headers, workspace_dict):
         namespace = "{}".format(CONFIG['METHOD']['NAMESPACE'])
         name = "{}".format(CONFIG['METHOD']['NAME'])
-        snapshot = "{}".format(CONFIG['METHOD']['NAMESPACE'])
+        snapshot = "{}".format(CONFIG['METHOD']['SNAPSHOT'])
 
         headers["content-type"] = "application/json"
         payload = {
             "configurationNamespace": namespace,
             "configurationName": name,
-            "configurationSnapshotId": snapshot,
+            "configurationSnapshotId": int(snapshot),
             "destinationNamespace": namespace,
             "destinationName": name}
 
@@ -127,7 +127,7 @@ class FireCloud(object):
             "methodConfigurationName": name,
             "entityType": "pair",
             "entityName": patient['patientId'] + '-pair',
-            "useCallCache": True,
+            "useCallCache": False,
             "workflowFailureMode": "NoNewCalls"
         }
 
@@ -233,7 +233,7 @@ class Launch(object):
     @staticmethod
     def copy_method(token, workspace_dict):
         headers = FireCloud.generate_headers(token)
-        FireCloud.copy_method(headers, workspace_dict)
+        r = FireCloud.copy_method(headers, workspace_dict)
 
     @staticmethod
     def submit_method(token, patient, workspace_dict):

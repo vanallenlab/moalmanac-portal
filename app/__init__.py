@@ -71,7 +71,7 @@ def user():
                                      patient_table=patient_table)
 
 
-@app.route('/upload', methods = ['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
     credentials = initialize_page()
     user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
@@ -119,6 +119,19 @@ def firecloud_down():
         return flask.render_template('firecloud_down.html',
                                      status_dict=flask.session['status_dict'],
                                      user_dict=flask.session['user_dict'])
+
+
+@app.route('/report/<bucket_id>/<submission_id>/<workflow_id>/<patient_id>')
+def display_report(bucket_id, submission_id, workflow_id, patient_id):
+    credentials = initialize_page()
+    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
+    if not user_ready:
+        return flask.redirect(flask.url_for('index'))
+    else:
+        bucket = portal_requests.GCloud.initialize_bucket(credentials, bucket_id)
+        obj = dict_manager.PatientTable.create_report_blob(submission_id, workflow_id, patient_id)
+        blob = portal_requests.GCloud.download_as_string(bucket, obj)
+        return blob.decode('utf-8')
 
 
 @app.errorhandler(503)

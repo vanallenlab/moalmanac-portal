@@ -40,17 +40,21 @@ class GCloud(object):
         return requests.post(request, headers=headers, params=params)
 
     @staticmethod
-    def initialize_bucket(credentials, workspace_dict):
+    def initialize_bucket(credentials, bucket_handle):
         gcs = storage.Client(credentials=credentials)
-        return gcs.get_bucket(workspace_dict['bucketHandle'].split('/')[2])
+        return gcs.get_bucket(bucket_handle)
 
     @staticmethod
     def upload_to_bucket(bucket, file):
         blob = bucket.blob(file.filename)
         blob.upload_from_string(
             file.read(),
-            content_type=file.content_type
-        )
+            content_type=file.content_type)
+
+    @staticmethod
+    def download_as_string(bucket, obj):
+        blob = bucket.blob(obj)
+        return blob.download_as_string()
 
 
 class FireCloud(object):
@@ -190,9 +194,9 @@ class Launch(object):
         table = dict_manager.PatientTable.generate(workspaces.json())
         for idx in table.index:
             table.loc[idx, 'workflowId'] = cls.append_workflow_id(headers, table.loc[idx, :])
-            table.loc[idx, 'reportUrl'] = dict_manager.PatientTable.create_report_url(
-                table.loc[idx, 'bucketName'], table.loc[idx, 'submissionId'],
-                table.loc[idx, 'workflowId'], table.loc[idx, 'patientId'])
+            table.loc[idx, 'reportUrl'] = dict_manager.PatientTable.create_report_blob(
+                table.loc[idx, 'submissionId'], table.loc[idx, 'workflowId'], table.loc[idx, 'patientId'])
+        table.to_csv('table.txt', sep='\t')
         return table
 
     @classmethod
@@ -247,7 +251,8 @@ class Launch(object):
     def submit_patient(cls, credentials, patient):
         token = credentials.token
         workspace_dict = cls.create_new_workspace(token, patient)
-        bucket = GCloud.initialize_bucket(credentials, workspace_dict)
+        bucket_id = dict_manager.NewWorkspace.extract_bucket_handle(workspace_dict)
+        bucket = GCloud.initialize_bucket(credentials, bucket_id)
         cls.submit_bucket_upload(bucket, patient)
         cls.update_datamodel(token, patient, workspace_dict)
         cls.copy_method(token, workspace_dict)

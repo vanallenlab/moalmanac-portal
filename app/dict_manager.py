@@ -93,8 +93,8 @@ class PatientTable(object):
 
     @classmethod
     def subset_portal_workspaces(cls, tagged_workspaces):
-        APP_TAG = CONFIG['STRINGS']['APP_TAG']
-        return [workspace for workspace in tagged_workspaces if APP_TAG in cls.return_items(workspace)]
+        app_tag = CONFIG['STRINGS']['APP_TAG']
+        return [workspace for workspace in tagged_workspaces if app_tag in cls.return_items(workspace)]
 
     @staticmethod
     def create_workspace_url(namespace, name):
@@ -109,6 +109,12 @@ class PatientTable(object):
         url = "https://api.firecloud.org/cookie-authed/download/b/" + bucket_name + "/o/" + submission_id + "/CHIPS/"
         url += workflow_id + "/call-chipsTask/" + patient_id + ".report.html"
         return url
+
+    @staticmethod
+    def create_report_blob(submission_id, workflow_id, patient_id):
+        subfolder1 = 'MolecularOncologyAlmanac'
+        subfolder2 = 'call-almanacTask'
+        return '{}/{}/{}/{}/{}.report.html'.format(submission_id, subfolder1, workflow_id, subfolder2, patient_id)
 
     @classmethod
     def format_workspace(cls, workspace):
@@ -146,10 +152,10 @@ class PatientTable(object):
         tagged_workspaces = cls.subset_tagged_workspaces(all_workspaces_json)
         portal_workspaces = cls.subset_portal_workspaces(tagged_workspaces)
 
-        patient_table = pd.DataFrame(columns = cls.patient_table_cols)
+        patient_table = pd.DataFrame(columns=cls.patient_table_cols)
         for workspace in portal_workspaces:
             patient_table = patient_table.append(cls.format_workspace(workspace), ignore_index=True)
-        return patient_table.sort_values(['createdDate'], ascending=False)
+        return patient_table.sort_values(by='createdDate', ascending=False)
 
 
 class Oncotree(object):
@@ -272,6 +278,10 @@ class NewWorkspace(object):
     @staticmethod
     def create_gsBucket_address(bucketName):
         return "gs://" + bucketName + "/"
+
+    @staticmethod
+    def extract_bucket_handle(workspace_dictionary):
+        return workspace_dictionary['bucketHandle'].split('/')[2]
 
 
 class DataModel(object):

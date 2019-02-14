@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import TextField, TextAreaField, validators, SelectField, StringField, SubmitField
 
+
 class UploadForm(FlaskForm):
     billingProject = SelectField(u'FireCloud Billing Project:',
                                  default=1, validators=[validators.required()])

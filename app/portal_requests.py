@@ -196,7 +196,6 @@ class Launch(object):
             table.loc[idx, 'workflowId'] = cls.append_workflow_id(headers, table.loc[idx, :])
             table.loc[idx, 'reportUrl'] = dict_manager.PatientTable.create_report_blob(
                 table.loc[idx, 'submissionId'], table.loc[idx, 'workflowId'], table.loc[idx, 'patientId'])
-        table.to_csv('table.txt', sep='\t')
         return table
 
     @classmethod

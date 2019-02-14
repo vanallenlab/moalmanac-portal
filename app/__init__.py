@@ -16,11 +16,12 @@ from time import time
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
 with open(CLIENT_SECRETS_FILE) as data_file:
-    config = json.load(data_file)
+    secrets = json.load(data_file)
 
-SCOPES = ['https://www.googleapis.com/auth/userinfo.email',
-           'https://www.googleapis.com/auth/plus.me',
-           'https://www.googleapis.com/auth/cloud-platform']
+SCOPES = ['https://www.googleapis.com/auth/devstorage.read_write',
+          'https://www.googleapis.com/auth/cloud-platform',
+          'openid',
+          'https://www.googleapis.com/auth/userinfo.email']
 
 API_SERVICE_NAME = 'cloud-platform'
 API_VERSION = 'v1'
@@ -31,7 +32,7 @@ db = dataset.connect(DB)
 
 CSRF_ENABLED = True
 app = flask.Flask(__name__)
-app.secret_key = str(config['web']['client_secret'])
+app.secret_key = str(secrets['web']['client_secret'])
 
 moment = flask_moment.Moment(app)
 bootstrap = flask_bootstrap.Bootstrap(app)

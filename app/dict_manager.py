@@ -5,6 +5,9 @@ import json
 from datetime import datetime
 from datetime import timedelta
 
+from config import CONFIG
+
+
 class StatusDict(object):
     @staticmethod
     def new_dict():
@@ -75,6 +78,7 @@ class Credentials(object):
                 'token_uri': credentials.token_uri, 'client_id': credentials.client_id,
                 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
 
+
 class PatientTable(object):
     patient_table_cols = ['namespace', 'name', 'url', 'time', 'createdDate', 'tumorTypeShort', 'tumorTypeLong',
                           'patientId', 'description', 'runningJobs', 'completed']
@@ -85,7 +89,19 @@ class PatientTable(object):
 
     @staticmethod
     def subset_portal_workspaces(tagged_workspaces):
-        return [workspace for workspace in tagged_workspaces if u'Chips&SalsaPortal' in workspace['workspace']['attributes']['tag:tags']['items']]
+        APP_TAG = CONFIG['STRINGS']['APP_TAG']
+        example_name = 'GBM_Example-Patient-A_2017-12-16_20-12-41'
+        example = [workspace for workspace in tagged_workspaces if workspace['workspace']['name'] == example_name]
+
+        print(example)
+        for workspace in example:
+            items = workspace['workspace']['attributes']['tag:tags']['items']
+            for item in items:
+                print(item, APP_TAG, item == APP_TAG)
+            #print(items, APP_TAG, APP_TAG in items)
+
+        return [workspace for workspace in tagged_workspaces if APP_TAG
+                in workspace['workspace']['attributes']['tag:tags']['items']]
 
     @staticmethod
     def create_workspace_url(namespace, name):
@@ -141,6 +157,7 @@ class PatientTable(object):
         for workspace in portal_workspaces:
             patient_table = patient_table.append(cls.format_workspace(workspace), ignore_index=True)
         return patient_table.sort_values(['createdDate'], ascending=False)
+
 
 class Oncotree(object):
     # http://oncotree.mskcc.org/oncotree/#/home oncotree_2017_06_21
@@ -219,7 +236,7 @@ class Submission(object):
 
     @staticmethod
     def create_attributes_tsv(submission_id):
-        return pd.DataFrame({'workspace:submissionId':submission_id}, index=[0]).to_csv(sep='\t', index=False)
+        return pd.DataFrame({'workspace:submissionId': submission_id}, index=[0]).to_csv(sep='\t', index=False)
 
 
 class BillingProjects(object):
@@ -234,6 +251,7 @@ class BillingProjects(object):
     def extract_as_tuples(cls, billing_projects):
         billing_projects_list = cls.extract_list(billing_projects)
         return [(billing_project, billing_project) for billing_project in billing_projects_list]
+
 
 class NewWorkspace(object):
     @classmethod
@@ -251,7 +269,7 @@ class NewWorkspace(object):
             "name": cls.create_workspace_name(patient['patientId'], patient['tumorTypeShort']),
             "attributes": {
                 "description": cls.format_workspace_description(patient['description']),
-                "tag:tags": {u'items': [u'Chips&SalsaPortal'], u'itemsType': u'AttributeValue'},
+                "tag:tags": {u'items': [u'{}'.format(CONFIG['STRINGS']['APP_TAG'])], u'itemsType': u'AttributeValue'},
                 "patientId": str(patient['patientId']),
                 "tumorTypeShort": str(patient['tumorTypeShort']),
                 "tumorTypeLong": str(patient['tumorTypeLong'])},

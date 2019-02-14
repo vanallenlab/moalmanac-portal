@@ -88,20 +88,13 @@ class PatientTable(object):
         return [workspace for workspace in all_workspaces if "tag:tags" in workspace['workspace']['attributes']]
 
     @staticmethod
-    def subset_portal_workspaces(tagged_workspaces):
+    def return_items(workspace_dictionary):
+        return workspace_dictionary['workspace']['attributes']['tag:tags']['items']
+
+    @classmethod
+    def subset_portal_workspaces(cls, tagged_workspaces):
         APP_TAG = CONFIG['STRINGS']['APP_TAG']
-        example_name = 'GBM_Example-Patient-A_2017-12-16_20-12-41'
-        example = [workspace for workspace in tagged_workspaces if workspace['workspace']['name'] == example_name]
-
-        print(example)
-        for workspace in example:
-            items = workspace['workspace']['attributes']['tag:tags']['items']
-            for item in items:
-                print(item, APP_TAG, item == APP_TAG)
-            #print(items, APP_TAG, APP_TAG in items)
-
-        return [workspace for workspace in tagged_workspaces if APP_TAG
-                in workspace['workspace']['attributes']['tag:tags']['items']]
+        return [workspace for workspace in tagged_workspaces if APP_TAG in cls.return_items(workspace)]
 
     @staticmethod
     def create_workspace_url(namespace, name):

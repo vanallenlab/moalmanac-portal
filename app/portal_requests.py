@@ -4,6 +4,8 @@ import google.oauth2.credentials
 import app.dict_manager as dict_manager
 from google.cloud import storage
 
+from config import CONFIG
+
 
 class GCloud(object):
     @staticmethod
@@ -98,13 +100,17 @@ class FireCloud(object):
 
     @staticmethod
     def copy_method(headers, workspace_dict):
+        namespace = "{}".format(CONFIG['METHOD']['NAMESPACE'])
+        name = "{}".format(CONFIG['METHOD']['NAME'])
+        snapshot = "{}".format(CONFIG['METHOD']['NAMESPACE'])
+
         headers["content-type"] = "application/json"
         payload = {
-            "configurationNamespace": "breardon",
-            "configurationName": "chips",
-            "configurationSnapshotId": 47,
-            "destinationNamespace": "breardon",
-            "destinationName": "chips"}
+            "configurationNamespace": namespace,
+            "configurationName": name,
+            "configurationSnapshotId": snapshot,
+            "destinationNamespace": namespace,
+            "destinationName": name}
 
         request = "https://api.firecloud.org/api/workspaces/"
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/method_configs/copyFromMethodRepo'
@@ -112,10 +118,13 @@ class FireCloud(object):
 
     @staticmethod
     def post_method_submission(headers, patient, workspace_dict):
+        namespace = "{}".format(CONFIG['METHOD']['NAMESPACE'])
+        name = "{}".format(CONFIG['METHOD']['NAME'])
+
         headers["content-type"] = "application/json"
         payload = {
-            "methodConfigurationNamespace": "breardon",
-            "methodConfigurationName": "chips",
+            "methodConfigurationNamespace": namespace,
+            "methodConfigurationName": name,
             "entityType": "pair",
             "entityName": patient['patientId'] + '-pair',
             "useCallCache": True,

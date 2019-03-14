@@ -156,7 +156,9 @@ class Launch(object):
     @staticmethod
     def check_billing(headers):
         r = FireCloud.get_billing_projects(headers)
-        if r.ok & len(r.json()) > 0:
+        condition1 = r.ok
+        condition2 = len(r.json()) > 0
+        if condition1 & condition2:
             return dict_manager.StatusDict.return_success()
         else:
             return dict_manager.StatusDict.return_danger()

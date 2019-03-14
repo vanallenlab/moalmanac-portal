@@ -81,6 +81,9 @@ def upload():
         oncotree_list = dict_manager.Oncotree.create_oncotree()
         form = forms.UploadForm()
         form.billingProject.choices = portal_requests.Launch.list_billing_projects(credentials.token)
+        print(form)
+        print(form.validate_on_submit())
+        print(form.errors)
         if flask.request.method == 'POST' and form.validate_on_submit():
             patient = dict_manager.Form.populate_patient(form)
             portal_requests.Launch.submit_patient(credentials, patient)

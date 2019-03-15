@@ -3,7 +3,7 @@
     {{ form.csrf_token }}
 
     <div class="col-md-12">
-        <h4>Required Fields</h4>
+        <h4>Required fields</h4>
         <p class="text-muted">Add your de-identified sample name, tumor type from Oncotree, and select a billing project.
             The following inputs are required.</p>
     </div>
@@ -15,7 +15,7 @@
             <small id="idHelp" class="form-text text-muted">Only letters, numbers, underscores, and are dashes allowed.</small>
         </div>
         <div class="form-group col-md-4">
-            <label for="tumorType">Tumor Type:</label>
+            <label for="tumorType">Tumor type:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#oncotreeModal"></span>
             {% for error in form.tumorType.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
             {% include "modals/oncotreeModal.html" %}
@@ -27,7 +27,7 @@
             </datalist>
         </div>
         <div class="form-group col-md-4">
-            <label for="billingProject">FireCloud Billing Project:</label>
+            <label for="billingProject">FireCloud billing project:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#billingModal"></span>
             {% include "modals/billingModal.html" %}
             <select class="form-control" name="billingProject" id="billingProject">
@@ -39,7 +39,7 @@
     </div>
 
     <div class="col-md-12">
-        <h4>Optional Fields</h4>
+        <h4>Optional fields</h4>
         <p class="text-muted">Add a description or upload any combination of the file types below.
             The following inputs are optional.</p>
     </div>
@@ -54,21 +54,21 @@
 
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label for="snvHandle">Single Nucleotide Variants:</label>
+            <label for="snvHandle">Single nucleotide variants:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#snvModal"></span>
             {% include "modals/snvModal.html" %}
             <input type="file" class="form-control-file" name="snvHandle" id="snvHandle" aria-describedby="fileHelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: MuTect 1.0</small>
         </div>
         <div class="form-group col-md-4">
-            <label for="indelHandle">Insertions or Deletions:</label>
+            <label for="indelHandle">Insertions or deletions:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#indelModal"></span>
             {% include "modals/indelModal.html" %}
             <input type="file" class="form-control-file" name="indelHandle" id="indelHandle" aria-describedby="fileHelp">
             <small id="fileHelp" class="form-text text-muted">Suggested method: Strelka</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
-            <label for="burdenHandle">Somatic Bases Covered:</label>
+            <label for="burdenHandle">Somatic bases covered:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#basesModal"></span>
             {% include "modals/basesModal.html" %}
             <input type="file" class="form-control-file" name="burdenHandle" id="burdenHandle" aria-describedby="filehelp">
@@ -78,7 +78,7 @@
 
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label for="segHandle">Copy Number Alterations:</label>
+            <label for="segHandle">Copy number alterations:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#segModal"></span>
             {% include "modals/segModal.html" %}
             <input type="file" class="form-control-file" name="segHandle" id="segHandle" aria-describedby="fileHelp">
@@ -92,7 +92,7 @@
             <small id="fileHelp" class="form-text text-muted">Suggested method: Star Fusion</small>
         </div>
         <div class="form-group col-md-4"><!-- Put question market for example file -->
-            <label for="dnarnaHandle">Single Nucleotide Variants (RNA):</label>
+            <label for="dnarnaHandle">Single nucleotide variants (RNA):</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#snvRNAModal"></span>
             {% include "modals/snvRNAModal.html" %}
             <input type="file" class="form-control-file" name="dnarnaHandle" id="dnarnaHandle" aria-describedby="filehelp">

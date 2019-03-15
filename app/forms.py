@@ -6,7 +6,9 @@ from wtforms import TextField, TextAreaField, validators, SelectField, StringFie
 class UploadForm(FlaskForm):
     billingProject = SelectField(u'FireCloud Billing Project:',
                                  default=1, validators=[validators.required()])
-    patientId = TextField('Patient ID:', validators=[validators.required()], render_kw={'placeholder': 'Dolores'})
+    patientId = TextField('De-identified patient id:',
+                          validators=[validators.required()],
+                          render_kw={'placeholder': 'de-identified-sample-name'})
     tumorType = TextField('Tumor Type:', validators=[validators.required()], render_kw={'placeholder': 'Glioblastoma'})
     snvHandle = FileField('Single Nucleotide Variants:', validators=[validators.optional()], default='')
     indelHandle = FileField('Insertions & Deletions:', validators=[validators.optional()], default='')

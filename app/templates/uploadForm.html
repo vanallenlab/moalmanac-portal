@@ -4,13 +4,14 @@
 
     <div class="col-md-12">
         <h4>Required Fields</h4>
-        <p class="text-muted">Add your patient ID, tumor type from Oncotree, and select a billing project. These inputs are required.</p>
+        <p class="text-muted">Add your de-identified sample name, tumor type from Oncotree, and select a billing project.
+            The following inputs are required.</p>
     </div>
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label for="patientId">Patient ID:</label>
+            <label for="patientId">De-identified sample name:</label>
             {% for error in form.patientId.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
-            <input type="text" class="form-control" id="patientId" name="patientId" placeholder="Dolores">
+            <input type="text" class="form-control" id="patientId" name="patientId" placeholder="de-identified-sample-name">
             <small id="idHelp" class="form-text text-muted">Only letters, numbers, underscores, and are dashes allowed.</small>
         </div>
         <div class="form-group col-md-4">
@@ -39,11 +40,12 @@
 
     <div class="col-md-12">
         <h4>Optional Fields</h4>
-        <p class="text-muted">Add a description or upload any combination of the file types below. All of these inputs are optional.</p>
+        <p class="text-muted">Add a description or upload any combination of the file types below.
+            The following inputs are optional.</p>
     </div>
     <div class="form-row">
         <div class="form-group col-md-12">
-            <label for="description">Patient Description:</label>
+            <label for="description">Analysis description:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#descriptionModal"></span>
             {% include "modals/descriptionModal.html" %}
             <textarea class="form-control" name="description" id="description" rows="5"></textarea>
@@ -121,7 +123,7 @@
         <div class="form-group col-md-12">
             <a href="{{ url_for('user') }}" class="btn btn-default" role="button">Cancel</a>
             &nbsp;
-            <button type="submit" class="btn btn-primary">Upload New Patient</button>
+            <button type="submit" class="btn btn-primary">Begin analysis</button>
         </div>
     </div>
 </form>

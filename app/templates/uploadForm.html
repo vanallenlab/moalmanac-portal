@@ -21,13 +21,13 @@
             {% include "modals/oncotreeModal.html" %}
             <input type="text" class="form-control" id="tumorType" name="tumorType" placeholder="Glioblastoma" list="ontology">
             <datalist id="ontology">
-            {% for ontology_ in oncotree %}
-                <option value="{{ ontology_ }}"></option>
+            {% for tumor_ontology in oncotree_list %}
+                <option value="{{ tumor_ontology }}"></option>
             {% endfor %}
             </datalist>
         </div>
         <div class="form-group col-md-4">
-            <label for="billingProject">FireCloud billing project:</label>
+            <label for="billingProject">Terra billing project:</label>
             <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#billingModal"></span>
             {% include "modals/billingModal.html" %}
             <select class="form-control" name="billingProject" id="billingProject">

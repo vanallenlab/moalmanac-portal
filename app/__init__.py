@@ -1,153 +1,182 @@
-import json
 import flask
 import flask_bootstrap
+import flask_login
 import flask_moment
-import dataset
+import json
+
+import google_auth_oauthlib
+import oauthlib.oauth2
+import requests
 
 import google_auth_oauthlib.flow
-import google.auth.transport.requests
 
-import app.portal_requests as portal_requests
+import app.db as db
 import app.dict_manager as dict_manager
 import app.forms as forms
 import app.log as log
+import app.portal_requests as portal_requests
 
-from time import time
+from app.user import User
+from config import CONFIG, SCOPES
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
 with open(CLIENT_SECRETS_FILE) as data_file:
-    secrets = json.load(data_file)
+    SECRETS = json.load(data_file)
 
-SCOPES = ['https://www.googleapis.com/auth/devstorage.read_write',
-          'https://www.googleapis.com/auth/cloud-platform',
-          'openid',
-          'https://www.googleapis.com/auth/userinfo.email']
+GOOGLE_CLIENT_ID = str(SECRETS['web']['client_id'])
+GOOGLE_CLIENT_SECRET = str(SECRETS['web']['client_secret'])
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 API_SERVICE_NAME = 'cloud-platform'
 API_VERSION = 'v1'
 
-DB = 'sqlite:///submissions.db'
-ADMIN = 'admin'
-db = dataset.connect(DB)
+bootstrap = flask_bootstrap.Bootstrap()
+login_manager = flask_login.LoginManager()
+moment_manager = flask_moment.Moment()
 
 CSRF_ENABLED = True
 app = flask.Flask(__name__)
-app.secret_key = str(secrets['web']['client_secret'])
+app.secret_key = GOOGLE_CLIENT_SECRET
+bootstrap.init_app(app)
+login_manager.init_app(app)
+moment_manager.init_app(app)
+db.init_app(app)
 
-moment = flask_moment.Moment(app)
-bootstrap = flask_bootstrap.Bootstrap(app)
+CLIENT = oauthlib.oauth2.WebApplicationClient(GOOGLE_CLIENT_ID)
+
+
+def get_google_provider_config():
+    return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 
 @app.before_request
 def check_under_maintenance():
-    var_maintenance = 0
-    if var_maintenance == 1:
+    if CONFIG['OPTIONS']['MAINTENANCE'] == 1:
         flask.abort(503)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    credentials = initialize_page()
-    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
-    if user_ready:
-        return flask.redirect(flask.url_for('user'))
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+        registered = flask_login.current_user.registered
+        billable = flask_login.current_user.billable
+
+        status = {'authenticated': authenticated, 'registered': registered, 'billable': billable}
+        if registered == 200 and registered == 200:
+            return flask.redirect(flask.url_for('user'))
+        else:
+            return flask.render_template('index.html', display=display, status=status, CONFIG=CONFIG)
     else:
-        return flask.render_template('index.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict'])
+        status = {'authenticated': False, 'registered': 400, 'billable': 400}
+        return flask.render_template('index.html', display='', status=status, CONFIG=CONFIG)
 
 
 @app.route('/user', methods=['GET', 'POST'])
+@flask_login.login_required
 def user():
-    credentials = initialize_page()
-    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
-    if not user_ready:
-        return flask.redirect(flask.url_for('index'))
-    else:
-        patient_table = portal_requests.Launch.list_workspaces(credentials.token)
-        return flask.render_template('user.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict'],
-                                     patient_table=patient_table)
+    display = flask_login.current_user.display
+    return flask.render_template('user.html', display=display, CONFIG=CONFIG)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
+@flask_login.login_required
 def upload():
-    credentials = initialize_page()
-    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
-    if not user_ready:
-        return flask.redirect(flask.url_for('index'))
+    if not portal_requests.FireCloud.get_health().ok:
+        return flask.redirect(flask.url_for('terra_down'))
+
+    display = flask_login.current_user.display
+    oncotree = dict_manager.Oncotree.create_oncotree()
+
+    credentials = dict_manager.Credentials.for_google(flask_login.current_user, SECRETS)
+    if dict_manager.DateTime.time_to_renew_token(flask_login.current_user.time_authorized):
+        response = refresh_token(credentials)
+        token = response
     else:
-        oncotree_list = dict_manager.Oncotree.create_oncotree()
-        form = forms.UploadForm()
-        form.billingProject.choices = portal_requests.Launch.list_billing_projects(credentials.token)
-        if flask.request.method == 'POST' and form.validate_on_submit():
-            patient = dict_manager.Form.populate_patient(form)
-            portal_requests.Launch.submit_patient(credentials, patient)
-            log.AppendDb.record(flask.session['user_dict']['email'])
+        token = flask_login.current_user.token
 
-            return flask.redirect(flask.url_for('user'))
-
-        return flask.render_template('upload.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict'],
-                                     billing_projects=form.billingProject.choices,
-                                     form=form,
-                                     oncotree=oncotree_list)
+    form = forms.UploadForm()
+    form.billingProject.choices = portal_requests.Launch.list_billing_projects(token)
+    if flask.request.method == 'POST' and form.validate_on_submit():
+        profile = dict_manager.Form.populate_patient(form)
+        portal_requests.Launch.submit_patient(token, profile, credentials)
+        return flask.redirect(flask.url_for('user'))
+    return flask.render_template('upload.html',
+                                 display=display,
+                                 CONFIG=CONFIG,
+                                 form=form,
+                                 billing_projects=form.billingProject.choices,
+                                 oncotree_list=oncotree)
 
 
-@app.route('/history')
-def history():
-    credentials = initialize_page()
-    if db[ADMIN].find_one(email=flask.session['user_dict']['email']):
-        return flask.render_template('history.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict'],
-                                     db=db['submissions'])
+@app.route('/submissions', methods=['GET', 'POST'])
+@flask_login.login_required
+def submissions():
+    if not portal_requests.FireCloud.get_health().ok:
+        return flask.redirect(flask.url_for('terra_down'))
+
+    display = flask_login.current_user.display
+    credentials = dict_manager.Credentials.for_google(flask_login.current_user, SECRETS)
+    if dict_manager.DateTime.time_to_renew_token(flask_login.current_user.time_authorized):
+        response = refresh_token(credentials)
+        token = response
     else:
-        return flask.render_template('404.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict']), 404
+        token = flask_login.current_user.token
+
+    patient_table = portal_requests.Launch.list_workspaces(token)
+    return flask.render_template('submissions.html', display=display, CONFIG=CONFIG, patient_table=patient_table)
 
 
-@app.route('/firecloud_down')
-def firecloud_down():
-    flask.session['firecloudHealth'] = portal_requests.FireCloud.get_health().ok
-    if flask.session['firecloudHealth']:
-        return flask.redirect(url_for('index'))
+@app.route('/terra_down')
+@flask_login.login_required
+def terra_down():
+    return flask.render_template('terra_down.html', display=flask_login.current_user.display, CONFIG=CONFIG)
+
+
+@app.route('/report/<namespace>/<name>/<bucket>', methods=['GET', 'POST'])
+@flask_login.login_required
+def display_report(namespace=None, name=None, bucket=None):
+    credentials = dict_manager.Credentials.for_google(flask_login.current_user, SECRETS)
+    if dict_manager.DateTime.time_to_renew_token(flask_login.current_user.time_authorized):
+        response = refresh_token(credentials)
+        token = response
     else:
-        return flask.render_template('firecloud_down.html',
-                                     status_dict=flask.session['status_dict'],
-                                     user_dict=flask.session['user_dict'])
+        token = flask_login.current_user.token
+    credentials['token'] = token
+    credentials_for_google = portal_requests.GCloud.authorize_credentials(credentials)
 
+    namespace = namespace
+    name = name
+    bucket = bucket
 
-@app.route('/report/<bucket_id>/<submission_id>/<workflow_id>/<patient_id>')
-def display_report(bucket_id, submission_id, workflow_id, patient_id):
-    credentials = initialize_page()
-    user_ready = dict_manager.StatusDict.evaluate(flask.session['status_dict'])
-    if not user_ready:
-        return flask.redirect(flask.url_for('index'))
-    else:
-        bucket = portal_requests.GCloud.initialize_bucket(credentials, bucket_id)
-        obj = dict_manager.PatientTable.create_report_blob(submission_id, workflow_id, patient_id)
-        blob = portal_requests.GCloud.download_as_string(bucket, obj)
-        return blob.decode('utf-8')
+    workspace_datamodel = portal_requests.Launch.get_datamodel(token, namespace, name)
+    url = workspace_datamodel.loc[0, 'report']
+    obj = url.replace(f'gs://{bucket}/', '')
+
+    initialized_bucket = portal_requests.GCloud.initialize_bucket(credentials_for_google, bucket)
+    blob = portal_requests.GCloud.download_as_string(initialized_bucket, obj)
+    return blob.decode('utf-8')
 
 
 @app.errorhandler(503)
 def maintenance(e):
-    credentials = initialize_page()
-    return flask.render_template('503.html',
-                                 status_dict=flask.session['status_dict'],
-                                 user_dict=flask.session['user_dict'])
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+    else:
+        display = ''
+    return flask.render_template('503.html', display=display, CONFIG=CONFIG), 503
 
 
 @app.errorhandler(404)
 def page_not_found(e):
-    credentials = initialize_page()
-    return flask.render_template('404.html',
-                                 status_dict=flask.session['status_dict'],
-                                 user_dict=flask.session['user_dict']), 404
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+    else:
+        display = ''
+    return flask.render_template('404.html', display=display, CONFIG=CONFIG), 404
 
 
 @app.route('/login')
@@ -155,82 +184,68 @@ def login():
     return flask.redirect(flask.url_for('authorize'))
 
 
-@app.route('/authorize')
+@app.route('/login/authorize')
 def authorize():
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES)
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
-    authorization_url, state = flow.authorization_url(
-        access_type='offline', include_granted_scopes='true')
-
+    authorization_url, state = flow.authorization_url(access_type='offline',
+                                                      include_granted_scopes='true',
+                                                      prompt='consent')
     flask.session['state'] = state
     return flask.redirect(authorization_url)
 
 
-@app.route('/oauth2callback')
+@app.route('/login/callback')
 def oauth2callback():
     state = flask.session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
     authorization_response = flask.request.url
     flow.fetch_token(authorization_response=authorization_response)
-    # Add comment for access denied
 
-    flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(flow.credentials)
-    flask.session['time_authorized'] = dict_manager.DateTime.datetime_for_session()
-    flask.session['time_authorized_orginal'] = flask.session['time_authorized']
+    credentials = dict_manager.Credentials.json_to_dictionary(flow.credentials.to_json())
+    token = credentials['token']
+    refresh = credentials['refresh_token']
+    scopes = credentials['scopes']
+
+    user_information = portal_requests.Launch.get_profile(token)
+    unique_id = user_information['id']
+    email = user_information['email']
+
+    returning_user = User.get(unique_id)
+    if not returning_user:
+        registration = portal_requests.Terra.check_registration(token).status_code
+        billing = portal_requests.Terra.get_billing_projects(token).status_code
+        User.create(unique_id, email, registration, billing, token, refresh, scopes)
+        current_user = User.get(unique_id)
+    else:
+        User.update_tokens(unique_id, token, refresh, scopes)
+        current_user = User.get(unique_id)
+
+    flask_login.login_user(current_user)
+    flask.flash('Logged in successfully')
     return flask.redirect(flask.url_for('index'))
 
 
-@app.route('/logout')
+@app.route("/logout")
+@flask_login.login_required
 def logout():
-    credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
-    r = portal_requests.GCloud.revoke_token(credentials.token) # Better handling for error codes
+    clear_session()
+    flask_login.logout_user()
+    flask.flash("Logged out successfully")
+    return flask.redirect(flask.url_for("index"))
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+
+def clear_session():
     flask.session.clear()
-    return flask.redirect(flask.url_for('index'))
+    [flask.session.pop(key) for key in list(flask.session.keys())]
 
 
-def refresh_token():
-    refreshed_token = portal_requests.Launch.refresh_token(flask.session['credentials'])
-    if refreshed_token == 'failed':
-        flask.session.clear()
-    else:
-        flask.session['credentials']['token'] = refreshed_token
-        flask.session['time_authorized'] = dict_manager.DateTime.datetime_for_session()
-
-
-def update_status_dict(token):
-    flask.session['status_dict'] = portal_requests.Launch.update_status_dict(
-        flask.session['status_dict'], token)
-
-
-def update_user_dict(token):
-    flask.session['user_dict'] = portal_requests.Launch.update_user_dict(
-        flask.session['user_dict'], token)
-
-
-def initialize_page():
-    flask.session['firecloudHealth'] = portal_requests.FireCloud.get_health().ok
-    if not flask.session['firecloudHealth']:
-        return flask.redirect(flask.url_for('firecloud_down'))
-
-    if 'time_authorized' in flask.session:
-        if dict_manager.DateTime.time_to_renew(flask.session['time_authorized']):
-            refresh_token()
-
-    if 'status_dict' not in flask.session:
-        flask.session.clear()
-        flask.session['status_dict'] = dict_manager.StatusDict.new_dict()
-        flask.session['user_dict'] = dict_manager.UserDict.new_dict()
-
-    if 'credentials' in flask.session:
-        credentials = portal_requests.GCloud.authorize_credentials(flask.session['credentials'])
-        flask.session['credentials'] = dict_manager.Credentials.credentials_to_dict(credentials)
-        if "danger" in flask.session['status_dict'].values():
-            update_status_dict(credentials.token)
-        if '' in flask.session['user_dict'].values():
-            update_user_dict(credentials.token)
-        return credentials
-    else:
-        return ''
+def refresh_token(credentials):
+    return portal_requests.Launch.refresh_token(credentials)

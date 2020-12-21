@@ -7,20 +7,19 @@ from google.cloud import storage
 from config import CONFIG
 
 
-class GCloud(object):
-    @staticmethod
-    def generate_headers(token):
-        return {"Authorization": "OAuth %s" % str(token)}
-
-    @classmethod
-    def get_email(cls, header):
-        request = "https://www.googleapis.com/oauth2/v2/userinfo"
-        return requests.get(request, headers=header)
-
+class GCloud:
     @staticmethod
     def authorize_credentials(flask_credentials):
-        return google.oauth2.credentials.Credentials(
-            **flask_credentials)
+        return google.oauth2.credentials.Credentials(**flask_credentials)
+
+    @staticmethod
+    def generate_headers(token):
+        return {"Authorization": f"OAuth {token}"}
+
+    @classmethod
+    def get_profile(cls, header):
+        request = "https://www.googleapis.com/oauth2/v2/userinfo"
+        return requests.get(request, headers=header)
 
     @staticmethod
     def revoke_token(token):
@@ -57,11 +56,74 @@ class GCloud(object):
         return blob.download_as_string()
 
 
+class Terra:
+    API_ROOT = "https://api.firecloud.org"
+
+    @staticmethod
+    def generate_headers(token):
+        return {"Authorization": f"Bearer {token}"}
+
+    @classmethod
+    def check_registration(cls, token):
+        headers = cls.generate_headers(token)
+        request = f"{cls.API_ROOT}/me"
+        return requests.get(request, headers=headers)
+
+    @classmethod
+    def copy_method(cls, token, workspace):
+        headers = cls.generate_headers(token)
+        headers["content-type"] = "application/json"
+
+        namespace = workspace['namespace']
+        name = workspace['name']
+
+        method_namespace = CONFIG['METHOD']['NAMESPACE']
+        method_name = CONFIG['METHOD']['NAME']
+        method_snapshot = CONFIG['METHOD']['SNAPSHOT']
+
+        payload = {
+            "configurationNamespace": method_namespace,
+            "configurationName": method_name,
+            "configurationSnapshotId": int(method_snapshot),
+            "destinationNamespace": method_namespace,
+            "destinationName": method_name
+        }
+
+        request = f"{cls.API_ROOT}/api/workspaces/{namespace}/{name}/method_configs/copyFromMethodRepo"
+        return requests.post(request, headers=headers, data=json.dumps(payload))
+
+    @classmethod
+    def get_billing_projects(cls, token):
+        headers = cls.generate_headers(token)
+        headers['accept'] = 'application/json'
+        request = f"{cls.API_ROOT}/api/profile/billing"
+        return requests.get(request, headers=headers)
+
+    @classmethod
+    def get_datamodel(cls, token, namespace, name, entity='pair'):
+        headers = cls.generate_headers(token)
+        request = f"{cls.API_ROOT}/api/workspaces/{namespace}/{name}/entities/{entity}/tsv"
+        return requests.get(request, headers=headers)
+
+    @classmethod
+    def get_monitor_submission(cls, token, namespace, name, submission_id):
+        headers = cls.generate_headers(token)
+        headers['accept'] = 'application/json'
+        request = f"{cls.API_ROOT}/api/workspaces/{namespace}/{name}/submissions/{submission_id}"
+        return requests.get(request, headers=headers)
+
+    @classmethod
+    def get_workspaces(cls, token):
+        headers = cls.generate_headers(token)
+        request = f"{cls.API_ROOT}/api/workspaces"
+        return requests.get(request, headers=headers)
+
+
 class FireCloud(object):
     # https://api.firecloud.org/
     @staticmethod
     def generate_headers(token):
-        return {"Authorization": "bearer " + str(token)}
+        return {"Authorization": f"Bearer {token}", }
 
     @staticmethod
     def get_health():
@@ -139,72 +201,18 @@ class FireCloud(object):
         request += workspace_dict['namespace'] + '/' + workspace_dict['name'] + '/' + 'submissions'
         return requests.post(request, headers=headers, data=json.dumps(payload))
 
-    @staticmethod
-    def get_workspaces(headers):
-        request = "https://api.firecloud.org/api/workspaces"
-        return requests.get(request, headers=headers)
-
 
 class Launch(object):
     @staticmethod
-    def registration(headers):
-        if FireCloud.check_registration(headers).ok:
-            return dict_manager.StatusDict.return_success()
-        else:
-            return dict_manager.StatusDict.return_danger()
-
-    @staticmethod
-    def check_billing(headers):
-        r = FireCloud.get_billing_projects(headers)
-        condition1 = r.ok
-        condition2 = len(r.json()) > 0
-        if condition1 & condition2:
-            return dict_manager.StatusDict.return_success()
-        else:
-            return dict_manager.StatusDict.return_danger()
-
-    @classmethod
-    def update_status_dict(cls, dict, token):
-        headers = FireCloud.generate_headers(token)
-        dict['google_status'] = dict_manager.StatusDict.return_success()
-        dict['firecloud_status'] = cls.registration(headers)
-        dict['billing_status'] = cls.check_billing(headers)
-        return dict
-
-    @classmethod
-    def get_email(cls, headers):
-        r = GCloud.get_email(headers)
-        return r.json()['email']
-
-    @classmethod
-    def update_user_dict(cls, dict, token):
-        headers = GCloud.generate_headers(token)
-        dict['email'] = cls.get_email(headers)
-        dict['username'] = dict_manager.UserDict.extract_username(dict['email'])
-        return dict
-
-    @staticmethod
-    def append_workflow_id(headers, workspace):
-        r = FireCloud.get_monitor_submission(headers, workspace['namespace'],
-                                             workspace['name'], workspace['submissionId'])
+    def append_workflow_id(token, workspace):
+        r = Terra.get_monitor_submission(token, workspace['namespace'], workspace['name'], workspace['submissionId'])
         return dict_manager.Submission.extract_workflow_id(r.json())
 
-    @classmethod
-    def list_workspaces(cls, token):
-        headers = FireCloud.generate_headers(token)
-        workspaces = FireCloud.get_workspaces(headers)
-        table = dict_manager.PatientTable.generate(workspaces.json())
-        for idx in table.index:
-            table.loc[idx, 'workflowId'] = cls.append_workflow_id(headers, table.loc[idx, :])
-            table.loc[idx, 'reportUrl'] = dict_manager.PatientTable.create_report_blob(
-                table.loc[idx, 'submissionId'], table.loc[idx, 'workflowId'], table.loc[idx, 'patientId'])
-        return table
-
-    @classmethod
-    def list_billing_projects(cls, token):
-        headers = FireCloud.generate_headers(token)
-        projects = FireCloud.get_billing_projects(headers)
-        return dict_manager.BillingProjects.extract_as_tuples(projects.json())
+    @staticmethod
+    def copy_method(token, workspace_dict):
+        r = Terra.copy_method(token, workspace_dict)
+        print(r.content)
+        print(r.status_code)
 
     @staticmethod
     def create_new_workspace(token, patient):
@@ -216,6 +224,35 @@ class Launch(object):
             new_workspace_dict['bucketName'])
         return new_workspace_dict
 
+    @classmethod
+    def get_datamodel(cls, token, namespace, name):
+        r = Terra.get_datamodel(token, namespace, name)
+        return dict_manager.DataModel.convert_content_to_dataframe(r.content)
+
+    @classmethod
+    def get_profile(cls, token):
+        headers = GCloud.generate_headers(token)
+        r = GCloud.get_profile(headers)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            return f'Failed to retrieve user info from Google {r.status_code}\n{r.content}'
+
+    @classmethod
+    def list_billing_projects(cls, token):
+        projects = Terra.get_billing_projects(token)
+        return dict_manager.BillingProjects.extract_as_tuples(projects.json())
+
+    @classmethod
+    def list_workspaces(cls, token):
+        workspaces = Terra.get_workspaces(token)
+        table = dict_manager.PatientTable.generate(workspaces.json())
+        for idx in table.index:
+            table.loc[idx, 'workflowId'] = cls.append_workflow_id(token, table.loc[idx, :])
+            table.loc[idx, 'reportUrl'] = dict_manager.PatientTable.create_report_blob(
+                table.loc[idx, 'submissionId'], table.loc[idx, 'workflowId'], table.loc[idx, 'patientId'])
+        return table
+
     @staticmethod
     def submit_bucket_upload(bucket, patient):
         handles = ['snvHandle', 'indelHandle', 'segHandle', 'fusionHandle',
@@ -223,22 +260,6 @@ class Launch(object):
         for handle in handles:
             if patient[handle] != '':
                 GCloud.upload_to_bucket(bucket, patient[handle])
-
-    @staticmethod
-    def update_datamodel(token, patient, workspace_dict):
-        participant_tsv = dict_manager.DataModel.create_participant_tsv(patient)
-        sample_tsv = dict_manager.DataModel.create_sample_tsv(patient)
-        pair_tsv = dict_manager.DataModel.create_pair_tsv(patient, workspace_dict)
-
-        headers = FireCloud.generate_headers(token)
-        r = FireCloud.post_entities(headers, workspace_dict, participant_tsv)
-        r = FireCloud.post_entities(headers, workspace_dict, sample_tsv)
-        r = FireCloud.post_entities(headers, workspace_dict, pair_tsv)
-
-    @staticmethod
-    def copy_method(token, workspace_dict):
-        headers = FireCloud.generate_headers(token)
-        r = FireCloud.copy_method(headers, workspace_dict)
 
     @staticmethod
     def submit_method(token, patient, workspace_dict):
@@ -249,11 +270,12 @@ class Launch(object):
         FireCloud.post_attributes(headers, workspace_dict, attributes_tsv)
 
     @classmethod
-    def submit_patient(cls, credentials, patient):
-        token = credentials.token
+    def submit_patient(cls, token, patient, credentials):
+        credentials_for_google = GCloud.authorize_credentials(credentials)
         workspace_dict = cls.create_new_workspace(token, patient)
         bucket_id = dict_manager.NewWorkspace.extract_bucket_handle(workspace_dict)
-        bucket = GCloud.initialize_bucket(credentials, bucket_id)
+        bucket = GCloud.initialize_bucket(credentials_for_google, bucket_id)
+        # Add more error handling
         cls.submit_bucket_upload(bucket, patient)
         cls.update_datamodel(token, patient, workspace_dict)
         cls.copy_method(token, workspace_dict)
@@ -266,3 +288,14 @@ class Launch(object):
             return r.json()['access_token']
         else:
             return 'failed'
+
+    @staticmethod
+    def update_datamodel(token, patient, workspace_dict):
+        participant_tsv = dict_manager.DataModel.create_participant_tsv(patient)
+        sample_tsv = dict_manager.DataModel.create_sample_tsv(patient)
+        pair_tsv = dict_manager.DataModel.create_pair_tsv(patient, workspace_dict)
+
+        headers = FireCloud.generate_headers(token)
+        r = FireCloud.post_entities(headers, workspace_dict, participant_tsv)
+        r = FireCloud.post_entities(headers, workspace_dict, sample_tsv)
+        r = FireCloud.post_entities(headers, workspace_dict, pair_tsv)

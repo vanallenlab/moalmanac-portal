@@ -14,16 +14,11 @@
         <div class="row text-center">
             <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg" role="button">Begin new analysis</a>
             &nbsp;&nbsp;
-            <a href="{{ url_for('submissions') }}" class="btn btn-primary btn-lg" role="button">View previous analyses</a>
-            &nbsp;&nbsp;
             <a href="https://app.terra.bio/#workspaces?tagsFilter%5B0%5D={{ CONFIG['STRINGS']['APP_TAG'] }}" class="btn btn-primary btn-lg" role="button" target="_blank">View workspaces on Terra</a>
         </div>
 
         <div class="row">
-            <div class="col-xs-1"></div>
-
-            <div class="col-xs-1"></div>
+            {% include "patientTable.html" %}
         </div>
-
     </div>
 {% endblock %}

@@ -18,18 +18,18 @@
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <span class="glyphicon glyphicon-question-sign"></span>&nbsp;&nbsp;Help<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="https://github.com/vanallenlab/almanac-portal/wiki" target="_blank">
+                        <li><a href="{{ CONFIG['METHOD']['GIT_REPO'] }}" target="_blank">
                             <span class="glyphicon glyphicon-info-sign"></span>&nbsp;&nbsp;Documentation</a></li>
-                        <li><a href="https://github.com/vanallenlab/almanac-portal/issues" target="_blank">
+                        <li><a href="{{ CONFIG['METHOD']['GIT_REPO'] }}/issues" target="_blank">
                             <span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;&nbsp;Issues</a></li>
-                        <li><a href="https://github.com/vanallenlab/almanac-portal" target="_blank">
+                        <li><a href="{{ CONFIG['METHOD']['GIT_REPO'] }}" target="_blank">
                             <span class="glyphicon glyphicon-folder-open"></span>&nbsp;&nbsp;Source Code</a></li>
                     </ul>
                 </li>
-                {% if user_dict['email'] != '' %}
+                {% if display != '' %}
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;{{ user_dict['username'] }}<span class="caret"></span></a>
+                            <span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;{{ display }}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ url_for('logout') }}">
                                 <span class="glyphicon glyphicon-log-out"></span>&nbsp;&nbsp;Logout</a></li>

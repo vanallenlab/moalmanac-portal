@@ -61,7 +61,7 @@ class Terra:
 
     @staticmethod
     def generate_headers(token):
-        return {"Authorization": f"Bearer {token}"}
+        return {"Authorization": f"Bearer {token}", "X-App-ID": CONFIG['STRINGS']['APP_TAG']}
 
     @classmethod
     def check_registration(cls, token):
@@ -211,8 +211,6 @@ class Launch(object):
     @staticmethod
     def copy_method(token, workspace_dict):
         r = Terra.copy_method(token, workspace_dict)
-        print(r.content)
-        print(r.status_code)
 
     @staticmethod
     def create_new_workspace(token, patient):

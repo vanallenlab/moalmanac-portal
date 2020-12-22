@@ -13,7 +13,6 @@ import google_auth_oauthlib.flow
 import app.db as db
 import app.dict_manager as dict_manager
 import app.forms as forms
-import app.log as log
 import app.portal_requests as portal_requests
 
 from app.user import User

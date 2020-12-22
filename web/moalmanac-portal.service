@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+[Service]
+User=breardon
+Group=www-data
+WorkingDirectory=/home/breardon/moalmanac-portal
+Environment="PATH=/home/breardon/moalmanac-portal/venv/bin"
+ExecStart=/home/breardon/moalmanac-portal/venv/bin/gunicorn --workers 5 --worker-class gevent --bind unix:moalmanac-portal.sock -m 007 run:app
+
+[Install]
+WantedBy=multi-user.target

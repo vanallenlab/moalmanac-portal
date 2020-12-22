@@ -93,7 +93,7 @@ def upload():
         response = refresh_token(credentials)
         token = response
     else:
-        token = flask_login.current_user.token
+        token = flask_login.current_user.access_token
 
     form = forms.UploadForm()
     form.billingProject.choices = portal_requests.Launch.list_billing_projects(token)
@@ -121,7 +121,7 @@ def submissions():
         response = refresh_token(credentials)
         token = response
     else:
-        token = flask_login.current_user.token
+        token = flask_login.current_user.access_token
 
     patient_table = portal_requests.Launch.list_workspaces(token)
     return flask.render_template('submissions.html', display=display, CONFIG=CONFIG, patient_table=patient_table)
@@ -141,7 +141,7 @@ def display_report(namespace=None, name=None, bucket=None):
         response = refresh_token(credentials)
         token = response
     else:
-        token = flask_login.current_user.token
+        token = flask_login.current_user.access_token
     credentials['token'] = token
     credentials_for_google = portal_requests.GCloud.authorize_credentials(credentials)
 

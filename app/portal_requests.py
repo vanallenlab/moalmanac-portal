@@ -211,6 +211,8 @@ class Launch(object):
     @staticmethod
     def copy_method(token, workspace_dict):
         r = Terra.copy_method(token, workspace_dict)
+        print(r.content)
+        print(r.status_code)
 
     @staticmethod
     def create_new_workspace(token, patient):

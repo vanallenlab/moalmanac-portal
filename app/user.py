@@ -72,6 +72,13 @@ class User(UserMixin):
         return user
 
     @staticmethod
+    def update_status(unique_id, registered, billable):
+        db = get_db()
+        sql = "UPDATE user SET registered = ?, billable = ? WHERE id = ?"
+        db.execute(sql, (registered, billable, unique_id))
+        db.commit()
+
+    @staticmethod
     def update_tokens(unique_id, access_token, refresh_token, scopes):
         db = get_db()
         scopes_str = ' '.join(scopes)

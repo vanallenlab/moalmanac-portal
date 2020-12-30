@@ -3,6 +3,7 @@ import flask_bootstrap
 import flask_login
 import flask_moment
 import json
+import os
 
 import google_auth_oauthlib
 import oauthlib.oauth2
@@ -25,6 +26,8 @@ with open(CLIENT_SECRETS_FILE) as data_file:
 GOOGLE_CLIENT_ID = str(SECRETS['web']['client_id'])
 GOOGLE_CLIENT_SECRET = str(SECRETS['web']['client_secret'])
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 API_SERVICE_NAME = 'cloud-platform'
 API_VERSION = 'v1'
@@ -63,9 +66,11 @@ def index():
         billable = flask_login.current_user.billable
 
         status = {'authenticated': authenticated, 'registered': registered, 'billable': billable}
-        if registered == 200 and registered == 200:
+        if registered == 200 and billable == 200:
             return flask.redirect(flask.url_for('user'))
         else:
+            registration, billing = check_status(flask_login.current_user.access_token)
+            User.update_status(flask_login.current_user.id, registration, billing)
             return flask.render_template('index.html', display=display, status=status, CONFIG=CONFIG)
     else:
         status = {'authenticated': False, 'registered': 400, 'billable': 400}
@@ -178,6 +183,26 @@ def page_not_found(e):
     return flask.render_template('404.html', display=display, CONFIG=CONFIG), 404
 
 
+@app.route('/terms')
+def terms():
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+    else:
+        display = ''
+    return flask.render_template('terms.html', display=display, CONFIG=CONFIG)
+
+
+@app.route('/privacy')
+def privacy():
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+    else:
+        display = ''
+    return flask.render_template('privacy.html', display=display, CONFIG=CONFIG)
+
+
 @app.route('/login')
 def login():
     return flask.redirect(flask.url_for('authorize'))
@@ -197,7 +222,9 @@ def authorize():
 @app.route('/login/callback')
 def oauth2callback():
     state = flask.session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE,
+                                                                   state=state,
+                                                                   scopes=SCOPES)
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
     authorization_response = flask.request.url
@@ -214,13 +241,14 @@ def oauth2callback():
 
     returning_user = User.get(unique_id)
     if not returning_user:
-        registration = portal_requests.Terra.check_registration(token).status_code
-        billing = portal_requests.Terra.get_billing_projects(token).status_code
+        registration, billing = check_status(token)
         User.create(unique_id, email, registration, billing, token, refresh, scopes)
-        current_user = User.get(unique_id)
     else:
+        if not returning_user.registered == 200 or not returning_user.billable == 200:
+            registration, billing = check_status(token)
+            User.update_status(unique_id, registration, billing)
         User.update_tokens(unique_id, token, refresh, scopes)
-        current_user = User.get(unique_id)
+    current_user = User.get(unique_id)
 
     flask_login.login_user(current_user)
     flask.flash('Logged in successfully')
@@ -248,3 +276,11 @@ def clear_session():
 
 def refresh_token(credentials):
     return portal_requests.Launch.refresh_token(credentials)
+
+
+def check_status(token):
+    registration = portal_requests.Terra.check_registration(token)
+    billing = portal_requests.Terra.get_billing_projects(token)
+    registration_code = registration.status_code
+    billing_code = 200 if len(billing.json()) > 0 else 401
+    return registration_code, billing_code

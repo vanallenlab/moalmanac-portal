@@ -11,9 +11,6 @@ def create_config():
 
 CONFIG = create_config()
 
-SCOPES = ['https://www.googleapis.com/auth/devstorage.read_write',
-          'https://www.googleapis.com/auth/cloud-platform',
-          'openid',
-          'https://www.googleapis.com/auth/userinfo.profile',
+SCOPES = ['https://www.googleapis.com/auth/cloud-platform',
           'https://www.googleapis.com/auth/userinfo.email',
           ]

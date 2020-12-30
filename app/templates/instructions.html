@@ -4,17 +4,17 @@
         <p class="lead text-muted" style="font-size: 12pt;">Complete the following to use the Molecular Oncology Almanac portal:</p>
         <table class="setup table">
             <!-- Check Google oauth -->
-            <tr class={{ "success" if authenticated else "danger" }}>
+            <tr class={{ "success" if status['authenticated'] else "danger" }}>
                 <td>1. <a href="{{ url_for('login') }}">Sign in with your Google account</a>.</td>
             </tr>
 
             <!-- Check FireCloud -->
-            <tr class={{ "success" if registered == 200 else "danger" }}>
+            <tr class={{ "success" if status['registered'] == 200 else "danger" }}>
                 <td>2. <a href="https://portal.firecloud.org/" target="_blank">Register with Terra</a>.</td>
             </tr>
 
             <!-- Send to Upload page or Modal -->
-            <tr class={{ "success" if billable == 200 else "danger" }}>
+            <tr class={{ "success" if status['billable'] == 200 else "danger" }}>
                 <td>3. <a href="https://software.broadinstitute.org/firecloud/documentation/topic?name=firecloud-tutorials" target="_blank">Set up billing for Terra</a>.</td>
             </tr>
         </table>

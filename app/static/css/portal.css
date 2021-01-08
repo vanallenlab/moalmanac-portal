@@ -7,6 +7,15 @@
     margin-bottom: 0;
 }
 
+a {
+	color: #A70C36;
+}
+
+a:hover {
+	color: #A70C36;
+	text-decoration: underline;
+}
+
 * {
     margin: 0;
 }
@@ -63,13 +72,10 @@ footer {
 .panel-heading span {
 	margin-top: -20px;
 	font-size: 15px;
-	background-color: #428bca;
 }
 
 .panel > .panel-heading {
     background-image: none;
-    background-color: #428bca;
-    color: white;
 }
 
 .table > thead > tr > th{

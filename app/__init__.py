@@ -203,6 +203,21 @@ def privacy():
     return flask.render_template('privacy.html', display=display, CONFIG=CONFIG)
 
 
+@app.route('/about')
+def about():
+    authenticated = flask_login.current_user.is_authenticated
+    if authenticated:
+        display = flask_login.current_user.display
+    else:
+        display = ''
+    return flask.render_template('about.html', display=display, CONFIG=CONFIG)
+
+
+@app.route('/example')
+def example():
+    return flask.render_template('example.report.html')
+
+
 @app.route('/login')
 def login():
     return flask.redirect(flask.url_for('authorize'))

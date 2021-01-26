@@ -297,5 +297,5 @@ def check_status(token):
     registration = portal_requests.Terra.check_registration(token)
     billing = portal_requests.Terra.get_billing_projects(token)
     registration_code = registration.status_code
-    billing_code = 200 if len(billing.json()) > 0 else 401
+    billing_code = billing.status_code
     return registration_code, billing_code

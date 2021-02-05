@@ -39,7 +39,7 @@ moment_manager = flask_moment.Moment()
 CSRF_ENABLED = True
 app = flask.Flask(__name__)
 app.secret_key = GOOGLE_CLIENT_SECRET
-app.config['MAX_CONTENT_LENGTH'] = 512 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 bootstrap.init_app(app)
 login_manager.init_app(app)
 moment_manager.init_app(app)

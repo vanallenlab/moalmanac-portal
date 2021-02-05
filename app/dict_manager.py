@@ -1,6 +1,6 @@
 import io
 import pandas as pd
-import moment
+import dateutil.parser as parser
 import json
 
 from datetime import datetime
@@ -179,7 +179,7 @@ class PatientTable(object):
 
     @staticmethod
     def convert_time(created_date):
-        return datetime.strptime(created_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return parser.parse(created_date)
 
     @staticmethod
     def create_report_blob(submission_id, workflow_id, patient_id):

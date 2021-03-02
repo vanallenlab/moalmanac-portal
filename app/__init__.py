@@ -156,7 +156,7 @@ def display_report(namespace=None, name=None, bucket=None):
     bucket = bucket
 
     workspace_datamodel = portal_requests.Launch.get_datamodel(token, namespace, name)
-    url = workspace_datamodel.loc[0, 'report']
+    url = workspace_datamodel.loc[0, 'moalmanac_report']
     obj = url.replace(f'gs://{bucket}/', '')
 
     initialized_bucket = portal_requests.GCloud.initialize_bucket(credentials_for_google, bucket)

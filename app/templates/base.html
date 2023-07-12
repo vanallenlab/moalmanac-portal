@@ -4,6 +4,7 @@
 {% block html_attribs %} lang="en" {% endblock %}
 
 {% block head %}
+    {{ super() }}
     {% include 'traffic.html' %}
 {% endblock %}
 

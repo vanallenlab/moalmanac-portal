@@ -3,8 +3,12 @@
 {% block title %} Molecular Oncology Almanac {% endblock %}
 {% block html_attribs %} lang="en" {% endblock %}
 
+{% block head %}
+    {% include 'traffic.html' %}
+{% endblock %}
+
 {% block styles %}
-    {{super()}}
+    {{ super() }}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/portal.css')}}">
 {% endblock %}
 

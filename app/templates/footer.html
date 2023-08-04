@@ -1,20 +1,24 @@
 <footer class="footer">
   <div class="container container-fluid text-muted">
-      <p align="center">
+      <p class="center-text">
           Please review our <a href="{{ url_for('privacy') }}">privacy policy</a> and <a href="{{ url_for('terms') }}">terms</a> before use.
           <br>
           <a href = "mailto: moalmanac@ds.dfci.harvard.edu" target="_blank">Contact</a> |
-          <a href="https://github.com/topics/molecular-oncology-almanac" target="_blank">Github</a> |
+          <a href="https://github.com/topics/molecular-oncology-almanac" target="_blank">GitHub</a> |
           <a href="https://twitter.com/moalmanac" target="_blank">Twitter</a>
       </p>
-      <br>
-      <ul id="logo-list" class="list-inline" align="center">
-        <li><a href="http://www.broadinstitute.org/" target="_blank">
-            <img src="{{ url_for('static', filename = 'img/broad.png') }}" class="img-responsive" height=50>
-        </a></li>
-        <li><a href="http://www.dana-farber.org/" target="_blank">
-            <img src="{{ url_for('static', filename = 'img/dana-farber.png') }}" class="img-responsive" height=50>
-        </a></li>
-    </ul>
+      <ul id="logo-list" class="list-inline">
+        <li class="logo-container">
+            <a href="https://www.dana-farber.org/" target="_blank">
+                <img src="{{ url_for('static', filename = 'img/dana-farber-color.png') }}" class="img-responsive footer-img" alt="Dana-Farber logo">
+            </a>
+        </li>
+        <li class="logo-container">
+            <a href="https://www.broadinstitute.org/" target="_blank">
+                <img src="{{ url_for('static', filename = 'img/broad-color.png') }}" class="img-responsive footer-img" alt="Broad Institute logo">
+            </a>
+        </li>
+      </ul>
+      {% include 'mailing-list.html' %}
   </div>
 </footer>

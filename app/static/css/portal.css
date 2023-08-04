@@ -1,19 +1,14 @@
 .title {
-    color: #A70C36
+    color: #00629B;
+}
+
+.subtitle {
+     color: #FFA300;
 }
 
 .jumbotron {
-    background-color: #ffffff;
+    background-color: transparent;
     margin-bottom: 0;
-}
-
-a {
-	color: #A70C36;
-}
-
-a:hover {
-	color: #A70C36;
-	text-decoration: underline;
 }
 
 * {
@@ -29,6 +24,55 @@ body {
     /* Margin bottom by footer height */
     height: 100%;
     margin-bottom: 60px;
+
+}
+
+a {
+    color: #00629B;
+}
+
+a:hover {
+    color: #00629B;
+    text-decoration: underline;
+}
+
+.navbar {
+    background-color: #00629B;
+}
+
+.navbar a:hover {
+    color: #003354;
+    background-color: #FFA300;
+}
+
+.navbar a {
+    color: #FFFFFF;
+}
+
+.navbar-brand:hover {
+    color: #003354;
+    background-color: #FFA300;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #003354;
+    background-color: #FFA300;
+}
+
+.nav .dropdown-toggle {
+    color: #FFFFFF;
+    background-color: #00629B;
+}
+
+.nav .dropdown.open .dropdown-toggle {
+    color: #003354;
+    background-color: #FFA300;
+}
+
+.nav .dropdown-toggle:focus,
+.nav .dropdown-toggle:active {
+    color: #FFFFFF;
+    background-color: #00629B;
 }
 
 footer {
@@ -36,12 +80,27 @@ footer {
     bottom: 0;
     width: 100%;
     padding: 2em;
-    background-color: #282828;
+    background-color: #EEEEEE;
     margin-top: 50px;
 }
 
 .footer img {
     margin-right: 2em;
+}
+
+.logo-container img {
+    height: 50px;
+    width: auto;
+}
+
+#logo-list {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.center-text {
+    text-align: center;
 }
 
 .status {
@@ -70,8 +129,8 @@ footer {
 }
 
 .panel-heading span {
-	margin-top: -20px;
-	font-size: 15px;
+    margin-top: -20px;
+    font-size: 15px;
 }
 
 .panel > .panel-heading {

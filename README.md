@@ -1,3 +1,6 @@
+**This service will be deprecated on 2026-01-05 due to [Google Cloud's deprecation of the Life Sciences API](https://support.terra.bio/hc/en-us/articles/38412190391579-June-27-2025). It may be revisited at a future date.**
+
+***
 # Molecular Oncology Almanac portal
 The [Molecular Oncology Almanac portal](https://portal.moalmanac.org/) is a web portal built on top of [Google Cloud](https://cloud.google.com/) and the Broad Institute's [Terra](https://terra.bio/) which allows users to run the [Molecular Oncology Almanac](https://github.com/vanallenlab/moalmanac) on Terra, without needing to know GitHub, Python, or even Terra. Submitting molecular profiles through this portal will create a Terra workspace on the user's behalf, upload specified metadata and files, and run the Terra method [vanallenlab/moalmanac](https://portal.firecloud.org/?return=terra#methods/vanallenlab/moalmanac/). 
 
